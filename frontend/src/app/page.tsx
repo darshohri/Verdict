@@ -60,6 +60,8 @@ export default function Home() {
 
   const lastClickTime = React.useRef(0);
   const handleHeadphoneClick = () => {
+    if (isExpanded) return;
+    
     const now = Date.now();
     if (now - lastClickTime.current < 1000) return;
     lastClickTime.current = now;
@@ -320,11 +322,11 @@ export default function Home() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={isExpanded ? {} : { scale: 0.95 }}
             onClick={handleHeadphoneClick}
             src="/headphones-cutout.png" 
             alt="Product Visual" 
-            className="z-20 object-contain drop-shadow-2xl select-none cursor-pointer"
+            className={`z-20 object-contain drop-shadow-2xl select-none ${isExpanded ? 'pointer-events-none' : 'cursor-pointer'}`}
             style={{ 
               gridArea: '1 / 1', 
               width: 'clamp(300px, 45vw, 600px)',
