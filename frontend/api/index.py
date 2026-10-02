@@ -36,7 +36,7 @@ async def vercel_handler(request: Request):
         req = EvaluateRequest(**body)
         
         if not apify_client or not groq_client:
-            raise HTTPException(status_code=500, detail="API keys not configured")
+            return {"error": "API keys not configured in Vercel"}
             
         url = req.search_query
         is_flipkart = "flipkart.com" in url.lower()
@@ -206,7 +206,7 @@ Product Data:
         req = ChatRequest(**body)
         
         if not groq_client:
-            raise HTTPException(status_code=500, detail="Groq API key not configured")
+            return {"response": "API keys not configured in Vercel"}
             
         try:
             completion = groq_client.chat.completions.create(
