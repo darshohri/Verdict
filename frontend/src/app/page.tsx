@@ -5,6 +5,46 @@ import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle
 import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
+const playDeepReverb = () => {
+  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContext) return;
+  const ctx = new AudioContext();
+  
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 1.0;
+  masterGain.connect(ctx.destination);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 1.0);
+
+  const subOsc = ctx.createOscillator();
+  subOsc.type = 'triangle';
+  subOsc.frequency.setValueAtTime(100, ctx.currentTime);
+  subOsc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 1.0);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1000, ctx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 1.0);
+
+  osc.connect(gain);
+  subOsc.connect(gain);
+  gain.connect(filter);
+  filter.connect(masterGain);
+
+  osc.start();
+  subOsc.start();
+  osc.stop(ctx.currentTime + 2.0);
+  subOsc.stop(ctx.currentTime + 2.0);
+};
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,6 +56,13 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [loadingStep, setLoadingStep] = useState(0);
   
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleHeadphoneClick = () => {
+    playDeepReverb();
+    setClickCount(prev => prev + 1);
+  };
+
   const loadingMessages = [
     { title: "Extracting Intelligence...", desc: "Crawling reviews, comparing historical prices, and running sentiment analysis." },
     { title: "Analyzing Sentiments...", desc: "Reading through verified purchaser feedback to identify hidden flaws." },
@@ -233,6 +280,25 @@ export default function Home() {
           >
             VERDIC<span style={{ marginLeft: '0.04em' }}>T</span>
           </motion.h1>
+
+          <AnimatePresence>
+            {clickCount > 0 && (
+              <motion.div
+                key={clickCount}
+                initial={{ scale: 0.8, opacity: 0.8 }}
+                animate={{ scale: 3.5, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="absolute z-10 rounded-full pointer-events-none mix-blend-multiply"
+                style={{ 
+                  width: 'clamp(300px, 45vw, 600px)',
+                  height: 'clamp(300px, 45vw, 600px)',
+                  gridArea: '1 / 1',
+                  background: 'radial-gradient(circle, rgba(255,77,21,0.6) 0%, rgba(255,77,21,0) 70%)',
+                }}
+              />
+            )}
+          </AnimatePresence>
           
           {/* The Physical Object (Middle Layer) */}
           <motion.img 
@@ -240,9 +306,11 @@ export default function Home() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleHeadphoneClick}
             src="/headphones-cutout.png" 
             alt="Product Visual" 
-            className="z-20 object-contain pointer-events-none drop-shadow-2xl select-none"
+            className="z-20 object-contain drop-shadow-2xl select-none cursor-pointer"
             style={{ 
               gridArea: '1 / 1', 
               width: 'clamp(300px, 45vw, 600px)',
