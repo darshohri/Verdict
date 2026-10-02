@@ -193,13 +193,21 @@ async def vercel_handler(request: Request):
                 high_res = product_data.get("highResolutionImages", [])
                 product_image = high_res[0] if high_res else product_data.get("thumbnailImage", "")
                 
+                price_val = product_data.get("price")
+                if isinstance(price_val, dict):
+                    price = price_val.get("value", "Unknown")
+                    currency = price_val.get("currency", "USD")
+                else:
+                    price = price_val if price_val is not None else "Unknown"
+                    currency = product_data.get("currency", "USD")
+                    
                 llm_context_dict = {
                     "title": product_name,
                     "description": product_data.get("description", ""),
-                    "price": product_data.get("price", {}),
-                    "currency": product_data.get("currency", "USD"),
-                    "bullets": product_data.get("bullets", []),
-                    "rating": product_data.get("rating", 0),
+                    "price": price,
+                    "currency": currency,
+                    "bullets": product_data.get("features", []),
+                    "rating": product_data.get("stars", 0),
                     "reviewsCount": product_data.get("reviewsCount", 0)
                 }
                 llm_context = json.dumps(llm_context_dict)[:6000]
