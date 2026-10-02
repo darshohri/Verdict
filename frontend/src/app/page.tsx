@@ -409,7 +409,7 @@ export default function Home() {
         {/* Scroll-driven decorative curve — full width behind everything */}
         {result && !isAnalyzing && !error && <ScrollCurve containerRef={resultsRef} />}
 
-        <div className="w-full max-w-5xl mx-auto px-6">
+        <div className="w-full max-w-5xl mx-auto px-6 relative z-10">
         
         <AnimatePresence mode="wait">
           {/* Error State */}
@@ -539,13 +539,13 @@ export default function Home() {
 
                 {/* Price Trend & Auth */}
                 <div className="flex flex-col gap-6 md:gap-8">
-                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-zinc-900 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
+                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF4D15]/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
                     <div className="flex items-center gap-4 mb-6 text-zinc-400 relative z-10">
-                      <TrendingDown size={22} className="text-[#FF4D15]" />
-                      <h3 className="font-bold tracking-widest uppercase text-sm text-white">Price Trend</h3>
+                      <TrendingDown size={22} className="text-[#FF4D15] group-hover:scale-110 transition-transform" />
+                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Price Trend</h3>
                     </div>
-                    <p className="text-base leading-relaxed text-zinc-300 relative z-10">
+                    <p className="text-base leading-relaxed text-zinc-600 relative z-10">
                       {result.price_trend_summary}
                     </p>
                   </motion.div>
