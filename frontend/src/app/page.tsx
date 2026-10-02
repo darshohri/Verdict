@@ -151,6 +151,13 @@ export default function Home() {
 
   const handleAnalyze = async () => {
     if (!url.trim()) return;
+
+    const trimmedUrl = url.trim().toLowerCase();
+    const cleanedUrl = trimmedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+    if (cleanedUrl === 'amazon.com' || cleanedUrl === 'amazon.in' || cleanedUrl === 'flipkart.com') {
+      setError("Please paste a link to a specific product (e.g. amazon.com/dp/B08X...), not the store's homepage.");
+      return;
+    }
     
     setIsAnalyzing(true);
     setError(null);
