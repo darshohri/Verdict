@@ -458,92 +458,104 @@ export default function Home() {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="w-full pb-20"
+              className="w-full pb-24"
             >
               {/* Product Header */}
-              <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-center gap-12 mb-16 bg-white/40 backdrop-blur-3xl p-8 md:p-14 rounded-[3rem] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.04)]">
-                <div className="w-48 h-48 md:w-64 md:h-64 shrink-0 bg-white rounded-[2.5rem] p-8 shadow-sm flex items-center justify-center mix-blend-multiply transition-transform hover:scale-105 duration-500">
-                  <img src={result.product_image || "/headphones-cutout.png"} alt="Product" className="w-full h-full object-contain" />
-                </div>
-                <div className="flex-1 text-center md:text-left flex flex-col justify-center">
-                  <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-800 mb-6 leading-tight max-w-3xl">
-                    {result.product_name || "Unknown Product"}
-                  </h3>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                    <div className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-widest shadow-sm ${getVerdictColor(result.verdict)}`}>
-                      VERDICT: {result.verdict}
+              <motion.div variants={itemVariants} className="relative overflow-hidden mb-16 bg-white p-8 md:p-12 rounded-[2.5rem] border border-zinc-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF4D15] via-[#FF8A00] to-[#FF4D15]" />
+                <div className="flex flex-col md:flex-row items-center gap-12 relative z-10">
+                  <div className="relative w-48 h-48 md:w-72 md:h-72 shrink-0 group">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-zinc-50 rounded-[2rem] transform transition-transform duration-700 group-hover:scale-105 group-hover:rotate-3" />
+                    <div className="absolute inset-0 flex items-center justify-center p-6 transform transition-transform duration-700 group-hover:scale-110">
+                      <img src={result.product_image || "/headphones-cutout.png"} alt="Product" className="w-full h-full object-contain mix-blend-multiply filter drop-shadow-xl" />
                     </div>
-                    <div className="text-sm font-semibold text-zinc-600 bg-white/80 px-5 py-2.5 rounded-full shadow-sm flex items-center gap-2">
-                      <CheckCircle2 size={16} className="text-green-500" />
-                      {result.confidence_score}% CONFIDENCE
+                  </div>
+                  <div className="flex-1 text-center md:text-left flex flex-col justify-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-500 text-xs font-bold tracking-widest mb-6 w-fit mx-auto md:mx-0">
+                      <Sparkles size={12} className="text-[#FF4D15]" />
+                      VERDICT ANALYSIS COMPLETE
+                    </div>
+                    <h3 className="text-3xl md:text-5xl font-black tracking-tight text-zinc-900 mb-8 leading-[1.1] max-w-3xl">
+                      {result.product_name || "Unknown Product"}
+                    </h3>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                      <div className={`px-8 py-3 rounded-full text-sm font-bold tracking-[0.2em] shadow-lg transition-transform hover:-translate-y-1 ${getVerdictColor(result.verdict)}`}>
+                        VERDICT: {result.verdict}
+                      </div>
+                      <div className="text-sm font-semibold text-zinc-700 bg-white border border-zinc-200 px-6 py-3 rounded-full shadow-sm flex items-center gap-2">
+                        <CheckCircle2 size={18} className="text-[#FF4D15]" />
+                        {result.confidence_score}% CONFIDENCE
+                      </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
 
               {/* Header / Verdict Summary */}
-              <motion.div variants={itemVariants} className="mb-20 px-6">
-                <h2 className="text-xl md:text-2xl font-medium tracking-tight text-zinc-600 leading-relaxed max-w-4xl mx-auto md:mx-0">
+              <motion.div variants={itemVariants} className="mb-20 px-4 md:px-8 relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4D15] rounded-full hidden md:block" />
+                <h2 className="text-xl md:text-3xl font-medium tracking-tight text-zinc-800 leading-relaxed max-w-4xl">
                   {result.executive_summary}
                 </h2>
               </motion.div>
 
               {/* Grid Layout for details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 mb-20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16">
                 {/* Pros */}
-                <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/60 shadow-sm transition-all hover:shadow-xl hover:shadow-green-500/10">
-                  <div className="flex items-center gap-4 mb-10">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                      <CheckCircle2 size={20} />
+                <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-green-500/10 hover:border-green-200 group">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                      <CheckCircle2 size={24} strokeWidth={2.5} />
                     </div>
-                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-800">The Good</h3>
+                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Good</h3>
                   </div>
-                  <ul className="space-y-6">
+                  <ul className="space-y-5">
                     {result.pros_recap.map((pro: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-4 text-[15px] leading-relaxed text-zinc-600">
-                        <div className="w-2 h-2 rounded-full bg-green-500 mt-2 shrink-0" />
-                        {pro}
+                      <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
+                        <div className="w-2 h-2 rounded-full bg-green-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
+                        <span className="flex-1">{pro}</span>
                       </li>
                     ))}
                   </ul>
                 </motion.div>
 
                 {/* Cons */}
-                <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/60 shadow-sm transition-all hover:shadow-xl hover:shadow-red-500/10">
-                  <div className="flex items-center gap-4 mb-10">
-                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                      <Minus size={20} />
+                <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-red-500/10 hover:border-red-200 group">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                      <Minus size={24} strokeWidth={2.5} />
                     </div>
-                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-800">The Bad</h3>
+                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Bad</h3>
                   </div>
-                  <ul className="space-y-6">
+                  <ul className="space-y-5">
                     {result.cons_recap.map((con: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-4 text-[15px] leading-relaxed text-zinc-600">
-                        <div className="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0" />
-                        {con}
+                      <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
+                        <div className="w-2 h-2 rounded-full bg-red-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                        <span className="flex-1">{con}</span>
                       </li>
                     ))}
                   </ul>
                 </motion.div>
 
                 {/* Price Trend & Auth */}
-                <div className="flex flex-col gap-8 md:gap-10">
-                  <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/60 shadow-sm transition-all hover:shadow-xl">
-                    <div className="flex items-center gap-4 mb-8 text-zinc-400">
-                      <TrendingDown size={20} />
-                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-800">Price Trend</h3>
+                <div className="flex flex-col gap-6 md:gap-8">
+                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-zinc-900 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
+                    <div className="flex items-center gap-4 mb-6 text-zinc-400 relative z-10">
+                      <TrendingDown size={22} className="text-[#FF4D15]" />
+                      <h3 className="font-bold tracking-widest uppercase text-sm text-white">Price Trend</h3>
                     </div>
-                    <p className="text-[15px] leading-relaxed text-zinc-600">
+                    <p className="text-base leading-relaxed text-zinc-300 relative z-10">
                       {result.price_trend_summary}
                     </p>
                   </motion.div>
                   
-                  <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/60 shadow-sm flex-1 transition-all hover:shadow-xl">
-                    <div className="flex items-center gap-4 mb-8 text-zinc-400">
-                      <AlertCircle size={20} />
-                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-800">Review Authenticity</h3>
+                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm flex-1 transition-all hover:shadow-xl group">
+                    <div className="flex items-center gap-4 mb-6 text-zinc-400">
+                      <AlertCircle size={22} className="text-blue-500 group-hover:scale-110 transition-transform" />
+                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Authenticity</h3>
                     </div>
-                    <p className="text-[15px] leading-relaxed text-zinc-600">
+                    <p className="text-base leading-relaxed text-zinc-600">
                       {result.review_authenticity_summary}
                     </p>
                   </motion.div>
@@ -551,14 +563,23 @@ export default function Home() {
               </div>
               
               {/* Supporting Evidence */}
-              <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/60 shadow-sm mb-12">
-                 <h3 className="font-bold tracking-widest uppercase text-sm mb-8 text-zinc-800">Deep Dive</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
-                   {result.supporting_evidence.map((evidence: string, idx: number) => (
-                      <p key={idx} className="text-[15px] text-zinc-600 leading-relaxed">
-                        {evidence}
-                      </p>
-                   ))}
+              <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-zinc-200 shadow-sm">
+                 <div className="flex items-center gap-3 mb-10">
+                   <div className="w-2 h-8 bg-[#FF4D15] rounded-full" />
+                   <h3 className="font-black tracking-widest uppercase text-lg text-zinc-900">Deep Dive</h3>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+                   {result.supporting_evidence.map((evidence: string, idx: number) => {
+                      const cleanEvidence = evidence.replace(/^[\s\W]*(bullet point|point|bullet|-)[\s\W]*/gi, '');
+                      return (
+                        <div key={idx} className="flex items-start gap-5 group">
+                          <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 group-hover:bg-[#FF4D15] mt-1.5 shrink-0 transition-colors duration-300 shadow-sm" />
+                          <p className="text-[15px] text-zinc-600 leading-relaxed font-medium">
+                            {cleanEvidence}
+                          </p>
+                        </div>
+                      );
+                   })}
                  </div>
               </motion.div>
             </motion.div>
