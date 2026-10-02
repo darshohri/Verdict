@@ -441,12 +441,6 @@ export default function Home() {
                 </div>
                 <h3 className="font-bold tracking-tight text-zinc-900 text-base">Verdict AI Assistant</h3>
               </div>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors"
-              >
-                <X size={18} />
-              </button>
             </div>
             
             {/* Messages */}
