@@ -213,10 +213,14 @@ async def vercel_handler(request: Request):
                 llm_context = json.dumps(llm_context_dict)[:6000]
 
             prompt = f"""
-You are an expert product analyst. Based on the following product data, generate a comprehensive evaluation report.
+You are an expert product analyst. Based on the following scraped data, first determine if this is a valid, single product page.
+If the data looks like a category page, a non-existent page (404), or a generic store page (e.g. no clear product name, no price, "Unknown Product"), mark "is_valid_product" as false and provide a helpful "error_message" telling the user to enter a real, existing product link.
+
 You must return your analysis strictly as a JSON object matching the following structure exactly, without any markdown formatting like ```json.
 
 {{
+    "is_valid_product": true | false,
+    "error_message": "<string, only if is_valid_product is false, otherwise empty>",
     "verdict": "BUY" | "PASS" | "WAIT",
     "confidence_score": <int 0-100>,
     "executive_summary": "<string>",
@@ -243,6 +247,9 @@ Product Data:
             
             llm_response_text = completion.choices[0].message.content
             llm_response = json.loads(llm_response_text)
+            
+            if not llm_response.get("is_valid_product", True):
+                return {"error": llm_response.get("error_message", "Oops! We couldn't find a valid product at this URL. Please make sure you entered a real, existing product link.")}
             
             return {
                 "product_name": product_name,
