@@ -7,10 +7,18 @@ import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
 import Lenis from 'lenis';
 
+let audioCtx: AudioContext | null = null;
+
 const playDeepReverb = () => {
-  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  if (!AudioContext) return;
-  const ctx = new AudioContext();
+  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContextClass) return;
+  if (!audioCtx) {
+    audioCtx = new AudioContextClass();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  const ctx = audioCtx;
   
   const masterGain = ctx.createGain();
   masterGain.gain.value = 1.0;
