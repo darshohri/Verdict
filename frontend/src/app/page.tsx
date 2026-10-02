@@ -274,7 +274,7 @@ export default function Home() {
           style={{ 
             display: 'grid', 
             placeItems: 'center',
-            transformOrigin: 'top center'
+            transformOrigin: 'center'
           }}
           animate={{
             scale: isExpanded ? 0.25 : 1,
