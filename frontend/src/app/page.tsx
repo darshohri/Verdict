@@ -58,7 +58,12 @@ export default function Home() {
   
   const [clickCount, setClickCount] = useState(0);
 
+  const lastClickTime = React.useRef(0);
   const handleHeadphoneClick = () => {
+    const now = Date.now();
+    if (now - lastClickTime.current < 1000) return;
+    lastClickTime.current = now;
+    
     playDeepReverb();
     setClickCount(prev => prev + 1);
   };
