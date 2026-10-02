@@ -54,7 +54,7 @@ export default function Home() {
     const minLoadingTime = isFast ? 8000 : 16000;
 
     try {
-      const response = await fetch('/api/v1/verdict/evaluate', {
+      const response = await fetch('/api/index?action=evaluate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export default function Home() {
     setIsChatting(true);
     
     try {
-      const response = await fetch('/api/v1/verdict/chat', {
+      const response = await fetch('/api/index?action=chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
