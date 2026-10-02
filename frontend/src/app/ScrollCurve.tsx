@@ -1,31 +1,52 @@
 "use client";
 
-import React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 
 /**
  * ScrollCurve — a subtle, full-page sweeping bezier stroke that draws itself
  * as the user scrolls through the results section.
- * Inspired by lusion.co's scroll-driven line effect.
+ * 
+ * Key fix: captures the initial scroll position on mount and uses it as
+ * a baseline, so the line always starts at 0 regardless of where the 
+ * container is when results first load.
  */
 export default function ScrollCurve({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const [isReady, setIsReady] = useState(false);
+  const baselineRef = useRef<number | null>(null);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    // "start start" = tracking starts when container top hits viewport top
-    // "end end" = tracking ends when container bottom hits viewport bottom
-    // This ensures full 0→1 mapping across the entire container scroll
     offset: ["start start", "end end"],
   });
 
-  // Direct transform — no spring. Lenis already smooths the scroll,
-  // and removing the spring eliminates the initial flash (spring settling).
-  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  
-  // Completely invisible at 0 scroll, fades in after user starts scrolling
-  const opacity = useTransform(scrollYProgress, [0, 0.01, 0.06], [0, 0, 1]);
+  // Capture the initial scroll value as baseline, then mark ready after
+  // the user has actually scrolled past it
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (baselineRef.current === null) {
+      // First read — capture baseline (the initial value on mount)
+      baselineRef.current = latest;
+      return;
+    }
+    // Only become "ready" once the user has scrolled beyond the baseline
+    if (!isReady && latest > baselineRef.current + 0.005) {
+      setIsReady(true);
+    }
+  });
 
-  // Full-width sweeping path starting from the far left edge,
-  // curving across the full viewport, and ending at the very bottom.
+  // Remap: subtract baseline so line starts from 0
+  const adjustedProgress = useTransform(scrollYProgress, (v) => {
+    if (baselineRef.current === null) return 0;
+    const baseline = baselineRef.current;
+    const range = 1 - baseline;
+    if (range <= 0) return 0;
+    return Math.max(0, (v - baseline) / range);
+  });
+
+  const pathLength = adjustedProgress;
+  const opacity = isReady ? 1 : 0;
+
+  // Full-width sweeping path from far left, across the page, to the bottom
   const curvePath = [
     "M -80,0",
     "C 100,150 400,250 720,320",
@@ -46,7 +67,7 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
       fill="none"
       preserveAspectRatio="none"
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 0, opacity, transition: "opacity 0.6s ease-in" }}
     >
       {/* Soft outer glow */}
       <motion.path
@@ -55,8 +76,7 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
         strokeWidth={100}
         strokeLinecap="round"
         fill="none"
-        initial={{ pathLength: 0, opacity: 0 }}
-        style={{ pathLength, opacity }}
+        style={{ pathLength }}
       />
       {/* Mid glow */}
       <motion.path
@@ -65,8 +85,7 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
         strokeWidth={44}
         strokeLinecap="round"
         fill="none"
-        initial={{ pathLength: 0, opacity: 0 }}
-        style={{ pathLength, opacity }}
+        style={{ pathLength }}
       />
       {/* Core line */}
       <motion.path
@@ -75,8 +94,7 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
         strokeWidth={8}
         strokeLinecap="round"
         fill="none"
-        initial={{ pathLength: 0, opacity: 0 }}
-        style={{ pathLength, opacity }}
+        style={{ pathLength }}
       />
     </svg>
   );
