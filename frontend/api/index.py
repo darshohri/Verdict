@@ -57,67 +57,66 @@ async def vercel_handler(request: Request):
             llm_context = ""
             
             if is_flipkart:
-                import requests
-                from bs4 import BeautifulSoup
-                
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+                run_input = {
+                    "startUrls": [{"url": url}],
+                    "pageFunction": """
+                        async function pageFunction(context) {
+                            const { $, request, log } = context;
+                            let product = null;
+                            $('script[type="application/ld+json"]').each((i, el) => {
+                                try {
+                                    let data = JSON.parse($(el).html());
+                                    if (Array.isArray(data)) data = data[0];
+                                    if (data['@type'] === 'Product') {
+                                        product = data;
+                                    }
+                                } catch(e) {}
+                            });
+                            return { product };
+                        }
+                    """,
+                    "proxyConfiguration": { "useApifyProxy": True }
                 }
-                res = requests.get(url, headers=headers)
-                soup = BeautifulSoup(res.content, 'html.parser')
                 
-                scripts = soup.find_all('script', type='application/ld+json')
-                for s in scripts:
-                    try:
-                        data = json.loads(s.string)
-                        if isinstance(data, list):
-                            data = data[0]
-                        if data.get('@type') == 'Product':
-                            product_name = data.get('name', 'Unknown Product')
-                            offers = data.get('offers', {})
-                            if isinstance(offers, list):
-                                offers = offers[0]
-                            price = offers.get('price', 0)
+                try:
+                    run = apify_client.actor("apify/cheerio-scraper").call(run_input=run_input)
+                    items = list(apify_client.dataset(run["defaultDatasetId"]).iterate_items())
+                    
+                    if items and items[0].get("product"):
+                        data = items[0]["product"]
+                        product_name = data.get("name", "Unknown Product")
+                        
+                        offers = data.get("offers", {})
+                        if isinstance(offers, list):
+                            offers = offers[0] if offers else {}
+                        price = offers.get("price", "Unknown")
+                        
+                        img = data.get("image", [])
+                        if isinstance(img, list) and len(img) > 0:
+                            product_image = img[0]
+                        elif isinstance(img, str):
+                            product_image = img
                             
-                            img = data.get('image', [])
-                            if isinstance(img, list) and len(img) > 0:
-                                product_image = img[0]
-                            elif isinstance(img, str):
-                                product_image = img
-                                
-                            reviews_list = []
-                            if isinstance(data.get("review"), list):
-                                for r in data.get("review"):
-                                    if "reviewBody" in r:
-                                        reviews_list.append(r["reviewBody"])
-                            
-                            llm_context_dict = {
-                                "title": product_name,
-                                "description": data.get("description", ""),
-                                "price": price,
-                                "currency": offers.get("priceCurrency", "INR"),
-                                "rating": data.get("aggregateRating", {}).get("ratingValue", 0),
-                                "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
-                                "reviews": reviews_list[:15]
-                            }
-                            llm_context = json.dumps(llm_context_dict)[:6000]
-                            break
-                    except Exception as e:
-                        pass
-                
-                if not llm_context:
-                    title_elem = soup.find('span', {'class': 'B_NuCI'}) or soup.find('span', {'class': 'VU-ZEz'})
-                    if title_elem:
-                        product_name = title_elem.text.strip()
+                        reviews_list = []
+                        if isinstance(data.get("review"), list):
+                            for r in data.get("review"):
+                                if "reviewBody" in r:
+                                    reviews_list.append(r["reviewBody"])
+                                    
                         llm_context_dict = {
                             "title": product_name,
-                            "description": "Extracted from HTML fallback.",
-                            "price": "Unknown",
+                            "description": data.get("description", ""),
+                            "price": price,
+                            "currency": offers.get("priceCurrency", "INR"),
+                            "rating": data.get("aggregateRating", {}).get("ratingValue", 0),
+                            "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
+                            "reviews": reviews_list[:15]
                         }
                         llm_context = json.dumps(llm_context_dict)[:6000]
-                
-                if not llm_context:
-                    return {"error": "Could not extract data from Flipkart URL"}
+                    else:
+                        return {"error": "Could not extract data from Flipkart URL"}
+                except Exception as e:
+                    return {"error": f"Scraper error: {str(e)}"}
                     
             else:
                 run_input = {
