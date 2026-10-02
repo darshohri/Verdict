@@ -27,7 +27,9 @@ export default function Home() {
     let interval: NodeJS.Timeout;
     if (isAnalyzing) {
       setLoadingStep(0);
-      const intervalTime = 4000;
+      // Amazon is faster (~8s), Flipkart via Apify takes longer (~16s)
+      const isAmazon = url.toLowerCase().includes('amazon');
+      const intervalTime = isAmazon ? 2000 : 4000;
       
       interval = setInterval(() => {
         setLoadingStep(prev => {
@@ -39,7 +41,7 @@ export default function Home() {
       }, intervalTime);
     }
     return () => clearInterval(interval);
-  }, [isAnalyzing]);
+  }, [isAnalyzing, url]);
 
   const handleAnalyze = async () => {
     if (!url.trim()) return;
@@ -47,6 +49,10 @@ export default function Home() {
     setIsAnalyzing(true);
     setError(null);
     setResult(null);
+    
+    const startTime = Date.now();
+    const isAmazon = url.toLowerCase().includes('amazon');
+    const minLoadingTime = isAmazon ? 8000 : 16000;
 
     try {
       const response = await fetch('/api/index?action=evaluate', {
@@ -64,6 +70,11 @@ export default function Home() {
       const data = await response.json();
       if (data.error) {
         throw new Error(data.error);
+      }
+      
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(r => setTimeout(r, minLoadingTime - elapsedTime));
       }
 
       setResult(data);
