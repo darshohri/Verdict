@@ -213,7 +213,7 @@ export default function Home() {
         className={`w-full flex flex-col items-center transition-all duration-1000 ease-in-out ${isExpanded ? 'h-[120px] md:h-[160px] shrink-0' : 'flex-1 justify-center -mt-12'}`}
       >
         <main 
-          className="w-full relative z-10 transition-transform duration-1000 ease-in-out"
+          className="w-full relative z-10 transition-transform duration-1000 ease-in-out select-none"
           style={{ 
             display: 'grid', 
             placeItems: 'center',
@@ -228,9 +228,7 @@ export default function Home() {
               fontSize: 'clamp(64px, 22vw, 360px)', 
               color: '#FF4D15', 
               lineHeight: 1,
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              x: textX,
-              y: textY
+              fontFamily: 'system-ui, -apple-system, sans-serif'
             }}
           >
             VERDIC<span style={{ marginLeft: '0.04em' }}>T</span>
@@ -238,12 +236,13 @@ export default function Home() {
           
           {/* The Physical Object (Middle Layer) */}
           <motion.img 
+            draggable={false}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
             src="/headphones-cutout.png" 
             alt="Product Visual" 
-            className="z-20 object-contain pointer-events-none drop-shadow-2xl"
+            className="z-20 object-contain pointer-events-none drop-shadow-2xl select-none"
             style={{ 
               gridArea: '1 / 1', 
               width: 'clamp(300px, 45vw, 600px)',
@@ -254,7 +253,6 @@ export default function Home() {
               perspective: 1000
             }}
           />
-
 
         </main>
       </motion.div>
