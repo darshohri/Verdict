@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
+import Lenis from 'lenis';
 
 const playDeepReverb = () => {
   const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -50,6 +51,21 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => lenis.destroy();
+  }, []);
   const [result, setResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState('');
@@ -374,9 +390,11 @@ export default function Home() {
       </motion.div>
       
       {/* Dynamic Results Dashboard */}
-      <div ref={resultsRef} className={`relative w-full max-w-5xl mx-auto px-6 transition-all duration-1000 ease-in-out flex-1 flex flex-col ${isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 pointer-events-none h-0 overflow-hidden'}`}>
-        {/* Scroll-driven decorative curve */}
+      <div ref={resultsRef} className={`relative w-full transition-all duration-1000 ease-in-out flex-1 flex flex-col ${isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 pointer-events-none h-0 overflow-hidden'}`}>
+        {/* Scroll-driven decorative curve — full width behind everything */}
         {result && !isAnalyzing && !error && <ScrollCurve containerRef={resultsRef} />}
+
+        <div className="w-full max-w-5xl mx-auto px-6">
         
         <AnimatePresence mode="wait">
           {/* Error State */}
@@ -531,6 +549,7 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>{/* close inner max-w wrapper */}
       </div>
 
       {/* Floating AI Chat */}
