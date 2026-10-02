@@ -262,19 +262,24 @@ export default function Home() {
       {/* Hero Section - Shrinks and moves up to make space for results */}
       <motion.div 
         layout
-        className={`w-full flex flex-col items-center transition-all duration-1000 ease-in-out ${isExpanded ? 'h-[120px] md:h-[160px] shrink-0' : 'flex-1 justify-center -mt-12'}`}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className={`w-full flex flex-col items-center ${isExpanded ? 'h-[120px] md:h-[160px] shrink-0' : 'flex-1 justify-center'}`}
       >
-        <main 
-          className="w-full relative z-10 transition-transform duration-1000 ease-in-out select-none"
+        <motion.main 
+          className="w-full relative z-10 select-none"
           style={{ 
             display: 'grid', 
             placeItems: 'center',
-            transform: isExpanded ? 'scale(0.25) translateY(0%)' : 'scale(1) translateY(0)',
             transformOrigin: 'top center'
           }}
+          animate={{
+            scale: isExpanded ? 0.25 : 1,
+            y: 0
+          }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.h1 
-            className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
+            className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none"
             style={{ 
               gridArea: '1 / 1', 
               fontSize: 'clamp(64px, 22vw, 360px)', 
@@ -327,11 +332,15 @@ export default function Home() {
             }}
           />
 
-        </main>
+        </motion.main>
       </motion.div>
 
       {/* Bottom Search Dock */}
-      <motion.div layout className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center transition-all duration-1000 ease-in-out ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-12 -mt-4 md:-mt-8'}`}>
+      <motion.div 
+        layout 
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-12'}`}
+      >
         <div className={`w-full bg-white rounded-[2rem] p-2 md:p-3 border flex items-center gap-2 md:gap-3 relative transition-all duration-500 ${isExpanded ? 'shadow-lg border-zinc-200' : 'shadow-2xl border-zinc-200 hover:shadow-3xl'}`}>
           <div className="pl-3 md:pl-4 text-zinc-400 shrink-0"><Search size={22} className="w-5 h-5 md:w-6 md:h-6" /></div>
           <input 
