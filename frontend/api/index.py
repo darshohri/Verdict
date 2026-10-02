@@ -131,7 +131,7 @@ async def vercel_handler(request: Request):
                 }
 
                 run = apify_client.actor("junglee/free-amazon-product-scraper").call(run_input=run_input)
-                items = list(apify_client.dataset(run.default_dataset_id).iterate_items())
+                items = list(apify_client.dataset(run["defaultDatasetId"]).iterate_items())
                 if not items:
                     return {"error": "Could not extract data from the provided URL"}
                     
