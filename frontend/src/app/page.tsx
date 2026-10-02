@@ -255,21 +255,7 @@ export default function Home() {
             }}
           />
 
-          <motion.h1 
-            className="z-30 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
-            style={{ 
-              gridArea: '1 / 1', 
-              fontSize: 'clamp(64px, 22vw, 360px)', 
-              color: '#FF4D15', 
-              lineHeight: 1,
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              clipPath: 'polygon(0 0, 39% 0, 39% 100%, 0 100%)',
-              x: textX,
-              y: textY
-            }}
-          >
-            VERDIC<span style={{ marginLeft: '0.04em' }}>T</span>
-          </motion.h1>
+
         </main>
       </motion.div>
 
