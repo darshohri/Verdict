@@ -282,7 +282,7 @@ export default function Home() {
             <motion.div 
               key="loading"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full h-full flex flex-col items-center justify-center py-24 text-zinc-400 gap-6"
+              className="w-full h-full flex flex-col items-center justify-center pt-8 pb-24 text-zinc-400 gap-6"
             >
               <AnimatePresence mode="wait">
                 <motion.div 
