@@ -195,12 +195,11 @@ export default function Home() {
             transformOrigin: 'top center'
           }}
         >
-          {/* The Giant Text (Background Layer) */}
           <h1 
             className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
             style={{ 
               gridArea: '1 / 1', 
-              fontSize: 'clamp(120px, 22vw, 360px)', 
+              fontSize: 'clamp(64px, 14vw, 360px)', 
               color: '#FF4D15', 
               lineHeight: 1,
               fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -223,12 +222,11 @@ export default function Home() {
             }}
           />
 
-          {/* The Weaving Text (Foreground Layer) */}
           <h1 
             className="z-30 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
             style={{ 
               gridArea: '1 / 1', 
-              fontSize: 'clamp(120px, 22vw, 360px)', 
+              fontSize: 'clamp(64px, 14vw, 360px)', 
               color: '#FF4D15', 
               lineHeight: 1,
               fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -241,26 +239,26 @@ export default function Home() {
       </motion.div>
 
       {/* Bottom Search Dock */}
-      <motion.div layout className={`relative z-30 w-full max-w-3xl mx-auto px-6 flex flex-col items-center transition-all duration-1000 ease-in-out ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-12 -mt-4 md:-mt-8'}`}>
-        <div className={`w-full bg-white rounded-3xl p-3 border flex items-center gap-3 relative transition-all duration-500 ${isExpanded ? 'shadow-lg border-zinc-200' : 'shadow-2xl border-zinc-200 hover:shadow-3xl'}`}>
-          <div className="pl-4 text-zinc-400"><Search size={22} /></div>
+      <motion.div layout className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center transition-all duration-1000 ease-in-out ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-12 -mt-4 md:-mt-8'}`}>
+        <div className={`w-full bg-white rounded-[2rem] p-2 md:p-3 border flex items-center gap-2 md:gap-3 relative transition-all duration-500 ${isExpanded ? 'shadow-lg border-zinc-200' : 'shadow-2xl border-zinc-200 hover:shadow-3xl'}`}>
+          <div className="pl-3 md:pl-4 text-zinc-400 shrink-0"><Search size={22} className="w-5 h-5 md:w-6 md:h-6" /></div>
           <input 
             type="text" 
-            placeholder="Paste Amazon or Flipkart URL to analyze..." 
+            placeholder="Paste Amazon or Flipkart URL..." 
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-            className="flex-1 bg-transparent border-none outline-none text-zinc-800 placeholder:text-zinc-400 font-medium py-3 text-sm md:text-base"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none text-zinc-800 placeholder:text-zinc-400 font-medium py-3 text-xs sm:text-sm md:text-base"
           />
           <button 
             onClick={handleAnalyze}
             disabled={isAnalyzing}
-            className="bg-black hover:bg-[#FF4D15] text-white px-8 py-3.5 rounded-xl font-bold uppercase text-[11px] tracking-widest transition-colors flex items-center justify-center gap-2 group shadow-md disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
+            className="bg-black hover:bg-[#FF4D15] text-white px-5 md:px-8 py-3 md:py-3.5 rounded-xl md:rounded-2xl font-bold uppercase text-[10px] md:text-[11px] tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 group shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             {isAnalyzing ? (
               <>Analyze</>
             ) : (
-              <>Analyze <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /></>
+              <>Analyze <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform w-3 h-3 md:w-4 md:h-4" /></>
             )}
           </button>
         </div>
