@@ -228,7 +228,7 @@ export default function Home() {
 
   return (
     <div 
-      className="relative w-full min-h-screen flex flex-col font-sans text-zinc-900 overflow-hidden"
+      className={`relative w-full flex flex-col font-sans text-zinc-900 overflow-x-hidden ${isExpanded ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
       style={{ background: 'linear-gradient(to bottom, #C4E0FA 0%, #DCEBFA 40%, #FFFFFF 100%)' }}
     >
       {/* Subtle Architectural Grid Overlay */}
@@ -262,8 +262,12 @@ export default function Home() {
       {/* Hero Section - Shrinks and moves up to make space for results */}
       <motion.div 
         layout
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className={`w-full flex flex-col items-center ${isExpanded ? 'h-[120px] md:h-[160px] shrink-0' : 'flex-1 justify-center'}`}
+        initial={false}
+        animate={{ 
+          height: isExpanded ? (typeof window !== 'undefined' && window.innerWidth >= 768 ? 160 : 120) : 'calc(100vh - 200px)' 
+        }}
+        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full flex flex-col items-center justify-center shrink-0"
       >
         <motion.main 
           className="w-full relative z-10 select-none"
@@ -276,7 +280,7 @@ export default function Home() {
             scale: isExpanded ? 0.25 : 1,
             y: 0
           }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.h1 
             className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none"
@@ -338,8 +342,8 @@ export default function Home() {
       {/* Bottom Search Dock */}
       <motion.div 
         layout 
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-12'}`}
+        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+        className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-8'}`}
       >
         <div className={`w-full bg-white rounded-[2rem] p-2 md:p-3 border flex items-center gap-2 md:gap-3 relative transition-all duration-500 ${isExpanded ? 'shadow-lg border-zinc-200' : 'shadow-2xl border-zinc-200 hover:shadow-3xl'}`}>
           <div className="pl-3 md:pl-4 text-zinc-400 shrink-0"><Search size={22} className="w-5 h-5 md:w-6 md:h-6" /></div>
