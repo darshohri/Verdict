@@ -179,9 +179,6 @@ export default function Home() {
             <div />
           )}
         </AnimatePresence>
-        <button className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white hover:scale-105 transition-transform shadow-lg">
-          <Menu size={16} />
-        </button>
       </nav>
 
       {/* Hero Section - Shrinks and moves up to make space for results */}
