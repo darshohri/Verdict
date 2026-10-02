@@ -1,52 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 /**
- * ScrollCurve — a subtle, full-page sweeping bezier stroke that draws itself
- * as the user scrolls through the results section.
+ * ScrollCurve — draws a sweeping bezier as the user scrolls.
  * 
- * Key fix: captures the initial scroll position on mount and uses it as
- * a baseline, so the line always starts at 0 regardless of where the 
- * container is when results first load.
+ * Fix: delays mount by 800ms so scroll position has settled after
+ * the results animation, then uses clean scroll tracking.
  */
-export default function ScrollCurve({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
-  const [isReady, setIsReady] = useState(false);
-  const baselineRef = useRef<number | null>(null);
-
+function ScrollCurveInner({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"],
+    offset: ["start 0.3", "end end"],
   });
 
-  // Capture the initial scroll value as baseline, then mark ready after
-  // the user has actually scrolled past it
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (baselineRef.current === null) {
-      // First read — capture baseline (the initial value on mount)
-      baselineRef.current = latest;
-      return;
-    }
-    // Only become "ready" once the user has scrolled beyond the baseline
-    if (!isReady && latest > baselineRef.current + 0.005) {
-      setIsReady(true);
-    }
-  });
+  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-  // Remap: subtract baseline so line starts from 0
-  const adjustedProgress = useTransform(scrollYProgress, (v) => {
-    if (baselineRef.current === null) return 0;
-    const baseline = baselineRef.current;
-    const range = 1 - baseline;
-    if (range <= 0) return 0;
-    return Math.max(0, (v - baseline) / range);
-  });
-
-  const pathLength = adjustedProgress;
-  const opacity = isReady ? 1 : 0;
-
-  // Full-width sweeping path from far left, across the page, to the bottom
   const curvePath = [
     "M -80,0",
     "C 100,150 400,250 720,320",
@@ -62,12 +32,15 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
   ].join(" ");
 
   return (
-    <svg
+    <motion.svg
       viewBox="0 0 1440 4200"
       fill="none"
       preserveAspectRatio="none"
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 0, opacity, transition: "opacity 0.6s ease-in" }}
+      style={{ zIndex: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeIn" }}
     >
       {/* Soft outer glow */}
       <motion.path
@@ -96,6 +69,23 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
         fill="none"
         style={{ pathLength }}
       />
-    </svg>
+    </motion.svg>
   );
+}
+
+/**
+ * Wrapper that delays mounting the inner component by 800ms
+ * so the page layout has fully settled after the results animation.
+ * This prevents any initial flash.
+ */
+export default function ScrollCurve({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!mounted) return null;
+  return <ScrollCurveInner containerRef={containerRef} />;
 }
