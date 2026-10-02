@@ -128,7 +128,10 @@ async def vercel_handler(request: Request):
                             return { product };
                         }
                     """,
-                    "proxyConfiguration": { "useApifyProxy": True }
+                    "proxyConfiguration": { "useApifyProxy": True },
+                    "maxRequestRetries": 0,
+                    "pageLoadTimeoutSecs": 15,
+                    "requestTimeoutSecs": 15
                 }
                 
                 try:
