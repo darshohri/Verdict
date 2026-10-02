@@ -241,11 +241,12 @@ export default function Home() {
   };
 
   const getVerdictColor = (verdict: string) => {
-    switch (verdict) {
-      case 'BUY': return 'bg-green-500 text-white';
-      case 'WAIT': return 'bg-yellow-500 text-black';
-      case 'AVOID': return 'bg-red-500 text-white';
-      default: return 'bg-zinc-800 text-white';
+    switch (verdict?.toUpperCase()) {
+      case 'BUY': return 'bg-[#00E573] text-black shadow-[0_0_30px_rgba(0,229,115,0.5)] ring-4 ring-offset-2 ring-[#00E573]/30';
+      case 'WAIT': return 'bg-[#FFB800] text-black shadow-[0_0_30px_rgba(255,184,0,0.5)] ring-4 ring-offset-2 ring-[#FFB800]/30';
+      case 'PASS':
+      case 'AVOID': return 'bg-[#FF3366] text-white shadow-[0_0_30px_rgba(255,51,102,0.5)] ring-4 ring-offset-2 ring-[#FF3366]/30';
+      default: return 'bg-zinc-800 text-white shadow-lg';
     }
   };
 
@@ -476,7 +477,6 @@ export default function Home() {
             >
               {/* Product Header */}
               <motion.div variants={itemVariants} className="relative overflow-hidden mb-16 bg-white p-8 md:p-12 rounded-[2.5rem] border border-zinc-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF4D15] via-[#FF8A00] to-[#FF4D15]" />
                 <div className="flex flex-col md:flex-row items-center gap-12 relative z-10">
                   <div className="relative w-48 h-48 md:w-72 md:h-72 shrink-0 group">
                     <div className="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-zinc-50 rounded-[2rem] transform transition-transform duration-700 group-hover:scale-105 group-hover:rotate-3" />
@@ -489,11 +489,11 @@ export default function Home() {
                       <Sparkles size={12} className="text-[#FF4D15]" />
                       VERDICT ANALYSIS COMPLETE
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-black tracking-tight text-zinc-900 mb-8 leading-[1.1] max-w-3xl">
+                    <h3 className="text-3xl md:text-5xl font-semibold tracking-tight text-zinc-700 mb-8 leading-[1.1] max-w-3xl">
                       {result.product_name || "Unknown Product"}
                     </h3>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                      <div className={`px-8 py-3 rounded-full text-sm font-bold tracking-[0.2em] shadow-lg transition-transform hover:-translate-y-1 ${getVerdictColor(result.verdict)}`}>
+                      <div className={`px-10 py-4 rounded-full text-lg md:text-xl font-black tracking-[0.15em] transition-transform hover:-translate-y-1 ${getVerdictColor(result.verdict)}`}>
                         VERDICT: {result.verdict}
                       </div>
                       <div className="text-sm font-semibold text-zinc-700 bg-white border border-zinc-200 px-6 py-3 rounded-full shadow-sm flex items-center gap-2">
