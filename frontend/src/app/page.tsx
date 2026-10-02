@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X } from 'lucide-react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
@@ -22,6 +22,32 @@ export default function Home() {
     { title: "Evaluating Price Trends...", desc: "Checking historical price drops and identifying fake discounts." },
     { title: "Synthesizing Verdict...", desc: "Compiling the final decision with our proprietary models." }
   ];
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  const headphoneX = useTransform(smoothX, [-1, 1], [-30, 30]);
+  const headphoneY = useTransform(smoothY, [-1, 1], [-30, 30]);
+  const headphoneRotateX = useTransform(smoothY, [-1, 1], [10, -10]);
+  const headphoneRotateY = useTransform(smoothX, [-1, 1], [-10, 10]);
+
+  const textX = useTransform(smoothX, [-1, 1], [-15, 15]);
+  const textY = useTransform(smoothY, [-1, 1], [-15, 15]);
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
+      const normalizedY = (e.clientY / window.innerHeight) * 2 - 1;
+      mouseX.set(normalizedX);
+      mouseY.set(normalizedY);
+    };
+    
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -195,18 +221,20 @@ export default function Home() {
             transformOrigin: 'top center'
           }}
         >
-          <h1 
+          <motion.h1 
             className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
             style={{ 
               gridArea: '1 / 1', 
-              fontSize: 'clamp(64px, 14vw, 360px)', 
+              fontSize: 'clamp(64px, 22vw, 360px)', 
               color: '#FF4D15', 
               lineHeight: 1,
-              fontFamily: 'system-ui, -apple-system, sans-serif'
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              x: textX,
+              y: textY
             }}
           >
             VERDIC<span style={{ marginLeft: '0.04em' }}>T</span>
-          </h1>
+          </motion.h1>
           
           {/* The Physical Object (Middle Layer) */}
           <motion.img 
@@ -215,26 +243,33 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
             src="/headphones-cutout.png" 
             alt="Product Visual" 
-            className="z-20 object-contain pointer-events-none drop-shadow-2xl transition-transform duration-700 hover:scale-105"
+            className="z-20 object-contain pointer-events-none drop-shadow-2xl"
             style={{ 
               gridArea: '1 / 1', 
-              width: 'clamp(300px, 45vw, 600px)'
+              width: 'clamp(300px, 45vw, 600px)',
+              x: headphoneX,
+              y: headphoneY,
+              rotateX: headphoneRotateX,
+              rotateY: headphoneRotateY,
+              perspective: 1000
             }}
           />
 
-          <h1 
+          <motion.h1 
             className="z-30 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none transition-all duration-1000"
             style={{ 
               gridArea: '1 / 1', 
-              fontSize: 'clamp(64px, 14vw, 360px)', 
+              fontSize: 'clamp(64px, 22vw, 360px)', 
               color: '#FF4D15', 
               lineHeight: 1,
               fontFamily: 'system-ui, -apple-system, sans-serif',
-              clipPath: 'polygon(0 0, 39% 0, 39% 100%, 0 100%)'
+              clipPath: 'polygon(0 0, 39% 0, 39% 100%, 0 100%)',
+              x: textX,
+              y: textY
             }}
           >
             VERDIC<span style={{ marginLeft: '0.04em' }}>T</span>
-          </h1>
+          </motion.h1>
         </main>
       </motion.div>
 
