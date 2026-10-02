@@ -1,37 +1,32 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 /**
- * ScrollCurve — a thick, sweeping bezier stroke that draws itself
+ * ScrollCurve — a subtle, sweeping bezier stroke that draws itself
  * as the user scrolls through the results section.
  * Inspired by lusion.co's scroll-driven line effect.
- *
- * It renders a full-viewport-width SVG pinned behind the content,
- * with the stroke's `pathLength` driven by scroll progress.
  */
 export default function ScrollCurve({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"],
+    offset: ["start end", "end start"],
   });
 
-  // Smooth it out so it doesn't feel jittery
+  // Much stiffer spring so it tracks scroll tightly
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 60,
-    damping: 30,
-    restDelta: 0.001,
+    stiffness: 300,
+    damping: 40,
+    restDelta: 0.0001,
   });
 
   // pathLength goes from 0 → 1 as user scrolls
   const pathLength = useTransform(smoothProgress, [0, 1], [0, 1]);
-  // Slight opacity fade in at the start
-  const opacity = useTransform(smoothProgress, [0, 0.05, 0.15], [0, 0.6, 1]);
+  // Completely invisible until user scrolls, then gentle fade in
+  const opacity = useTransform(smoothProgress, [0, 0.01, 0.08], [0, 0, 1]);
 
-  // The path: a big sweeping S-curve from top-left, curving to right, 
-  // then swooping back left, then finishing bottom-right.
-  // ViewBox is 1440x3000 to cover a tall scrollable results area.
+  // Sweeping S-curve path
   const curvePath =
     "M -100,0 C 200,300 1300,200 1100,600 C 900,1000 -100,900 100,1400 C 300,1900 1400,1700 1300,2200 C 1200,2700 200,2500 400,3000";
 
@@ -44,11 +39,11 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
         className="absolute top-0 left-0 w-full h-full"
         style={{ minHeight: "100%" }}
       >
-        {/* Glow layer — wider, more transparent */}
+        {/* Soft outer glow — very subtle */}
         <motion.path
           d={curvePath}
-          stroke="rgba(255, 77, 21, 0.12)"
-          strokeWidth={80}
+          stroke="rgba(255, 120, 60, 0.04)"
+          strokeWidth={90}
           strokeLinecap="round"
           fill="none"
           style={{
@@ -56,10 +51,10 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
             opacity,
           }}
         />
-        {/* Mid glow */}
+        {/* Mid glow — light warmth */}
         <motion.path
           d={curvePath}
-          stroke="rgba(255, 77, 21, 0.2)"
+          stroke="rgba(255, 120, 60, 0.06)"
           strokeWidth={40}
           strokeLinecap="round"
           fill="none"
@@ -68,11 +63,11 @@ export default function ScrollCurve({ containerRef }: { containerRef: React.RefO
             opacity,
           }}
         />
-        {/* Core stroke — the main visible line */}
+        {/* Core stroke — light and subtle, not overpowering text */}
         <motion.path
           d={curvePath}
-          stroke="#FF4D15"
-          strokeWidth={14}
+          stroke="rgba(255, 77, 21, 0.12)"
+          strokeWidth={10}
           strokeLinecap="round"
           fill="none"
           style={{
