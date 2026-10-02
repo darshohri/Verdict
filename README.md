@@ -2,7 +2,7 @@
 
 Verdict is an AI-powered product evaluation engine designed to help you make smarter purchasing decisions. Simply paste an Amazon or Flipkart product URL, and Verdict will instantly crawl reviews, analyze price trends, and synthesize a clear **BUY**, **WAIT**, or **AVOID** verdict.
 
-![Verdict Banner](frontend/public/headphones-cutout.png)
+<img src="frontend/public/headphones-cutout.png" alt="Verdict Banner" width="250" />
 
 ## Features 🚀
 
