@@ -481,7 +481,7 @@ export default function Home() {
                   <div className="relative w-48 h-48 md:w-72 md:h-72 shrink-0 group">
                     <div className="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-zinc-50 rounded-[2rem] transform transition-transform duration-700 group-hover:scale-105 group-hover:rotate-3" />
                     <div className="absolute inset-0 flex items-center justify-center p-6 transform transition-transform duration-700 group-hover:scale-110">
-                      <img src={result.product_image || "/headphones-cutout.png"} alt="Product" className="w-full h-full object-contain mix-blend-multiply filter drop-shadow-xl" />
+                      <img src={result.product_image || "/headphones-cutout.png"} alt="Product" referrerPolicy="no-referrer" className="w-full h-full object-contain mix-blend-multiply filter drop-shadow-xl" />
                     </div>
                   </div>
                   <div className="flex-1 text-center md:text-left flex flex-col justify-center">
