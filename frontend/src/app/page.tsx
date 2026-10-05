@@ -485,10 +485,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 text-center md:text-left flex flex-col justify-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-500 text-xs font-bold tracking-widest mb-6 w-fit mx-auto md:mx-0">
-                      <Sparkles size={12} className="text-[#FF4D15]" />
-                      VERDICT ANALYSIS COMPLETE
-                    </div>
+
                     <h3 className="text-3xl md:text-5xl font-semibold tracking-tight text-zinc-700 mb-8 leading-[1.1] max-w-3xl">
                       {result.product_name || "Unknown Product"}
                     </h3>
@@ -496,10 +493,7 @@ export default function Home() {
                       <div className={`px-10 py-4 rounded-full text-lg md:text-xl font-black tracking-[0.15em] transition-transform hover:-translate-y-1 ${getVerdictColor(result.verdict)}`}>
                         VERDICT: {result.verdict}
                       </div>
-                      <div className="text-sm font-semibold text-zinc-700 bg-white border border-zinc-200 px-6 py-3 rounded-full shadow-sm flex items-center gap-2">
-                        <CheckCircle2 size={18} className="text-[#FF4D15]" />
-                        {result.confidence_score}% CONFIDENCE
-                      </div>
+
                     </div>
                   </div>
                 </div>
