@@ -133,7 +133,8 @@ async def vercel_handler(request: Request):
                 
                 try:
                     run = apify_client.actor("apify/cheerio-scraper").call(run_input=run_input)
-                    items = list(apify_client.dataset(run.default_dataset_id).iterate_items())
+                    dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
+                    items = list(apify_client.dataset(dataset_id).iterate_items())
                     
                     if items and items[0].get("product"):
                         data = items[0]["product"]
@@ -183,7 +184,8 @@ async def vercel_handler(request: Request):
                 }
 
                 run = apify_client.actor("junglee/free-amazon-product-scraper").call(run_input=run_input)
-                items = list(apify_client.dataset(run.default_dataset_id).iterate_items())
+                dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
+                items = list(apify_client.dataset(dataset_id).iterate_items())
                 if not items:
                     return {"error": "Could not extract data from the provided URL"}
                     
