@@ -67,70 +67,122 @@ async def evaluate(request: EvaluateRequest):
         llm_context = ""
         
         if is_flipkart:
-            import requests
-            from bs4 import BeautifulSoup
-            
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-            }
-            res = requests.get(url, headers=headers)
-            soup = BeautifulSoup(res.content, 'html.parser')
-            
-            scripts = soup.find_all('script', type='application/ld+json')
-            for s in scripts:
-                try:
-                    data = json.loads(s.string)
-                    if isinstance(data, list):
-                        data = data[0]
-                    if data.get('@type') == 'Product':
-                        product_name = data.get('name', 'Unknown Product')
-                        offers = data.get('offers', {})
-                        if isinstance(offers, list):
-                            offers = offers[0]
-                        price = offers.get('price', 0)
+            if not apify_client:
+                return {"error": "Apify token missing in environment for Flipkart scraping"}
+                
+            run_input = {
+                "startUrls": [{"url": url}],
+                "pageFunction": """
+                    async function pageFunction(context) {
+                        const { $, request, log } = context;
+                        let product = {};
+                        $('script[type="application/ld+json"]').each((i, el) => {
+                            try {
+                                let data = JSON.parse($(el).html());
+                                if (Array.isArray(data)) data = data[0];
+                                if (data['@type'] === 'Product') {
+                                    product = data;
+                                }
+                            } catch(e) {}
+                        });
                         
-                        img = data.get('image', [])
-                        if isinstance(img, list) and len(img) > 0:
-                            product_image = img[0]
-                        elif isinstance(img, str):
-                            product_image = img
-                            
-                        # Extract reviews if available
-                        reviews_list = []
-                        if isinstance(data.get("review"), list):
-                            for r in data.get("review"):
-                                if "reviewBody" in r:
-                                    reviews_list.append(r["reviewBody"])
-                        
-                        # Context for LLM
-                        llm_context_dict = {
-                            "title": product_name,
-                            "description": data.get("description", ""),
-                            "price": price,
-                            "currency": offers.get("priceCurrency", "INR"),
-                            "rating": data.get("aggregateRating", {}).get("ratingValue", 0),
-                            "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
-                            "reviews": reviews_list[:15]
+                        // Fallback manual DOM extraction
+                        if (!product.name) {
+                            product.name = $('span.VU-Tz5').text().trim() || $('span.B_NuCI').text().trim() || $('h1').text().trim();
                         }
-                        llm_context = json.dumps(llm_context_dict)[:6000]
-                        break
-                except Exception as e:
-                    pass
+                        if (!product.image) {
+                            product.image = $('img._396cs4, img._2r_T1I, img.v2-Aam').attr('src');
+                        }
+                        
+                        // Extract Price
+                        const priceText = $('div.Nx9bqj.CrvsUO').text().trim() || $('div._30jeq3._16Jk6d').text().trim();
+                        if (priceText) {
+                            product.offers = product.offers || {};
+                            product.offers.price = priceText;
+                            product.offers.priceCurrency = 'INR';
+                        }
+                        
+                        // Extract Ratings & Reviews Count
+                        const ratingText = $('div.ipqd2A, div._3LWZlK, div.XQDdHH').first().text().trim();
+                        const reviewsText = $('span.Wphh3N, span._2_R_DZ').first().text().trim();
+                        if (ratingText || reviewsText) {
+                            product.aggregateRating = product.aggregateRating || {};
+                            if (ratingText) product.aggregateRating.ratingValue = ratingText;
+                            if (reviewsText) {
+                                 const revCount = reviewsText.replace(/[^0-9]/g, '');
+                                 if (revCount) product.aggregateRating.reviewCount = revCount;
+                            }
+                        }
+                        
+                        // Extract Description & Highlights
+                        if (!product.description) {
+                            const desc = $('div.yN\\\\+eNk, div._1mXcCf').text().trim();
+                            const highlights = [];
+                            $('ul.GNDEQ- li, ul._1mXcCf li, div.X3BRps li').each((i, el) => {
+                                highlights.push($(el).text().trim());
+                            });
+                            product.description = desc + " " + highlights.join(". ");
+                        }
+                        
+                        // Extract Review Bodies
+                        let reviewList = product.review || [];
+                        if (!Array.isArray(reviewList)) {
+                            reviewList = [reviewList];
+                        }
+                        if (reviewList.length === 0) {
+                            $('div.Zmyqri, div.t-ZTKy').each((i, el) => {
+                                reviewList.push({ reviewBody: $(el).text().trim() });
+                            });
+                            if (reviewList.length > 0) {
+                                product.review = reviewList;
+                            }
+                        }
+
+                        return { product };
+                    }
+                """,
+                "proxyConfiguration": { "useApifyProxy": True }
+            }
             
-            # If JSON-LD failed to provide useful data, attempt basic HTML extraction
-            if not llm_context:
-                title_elem = soup.find('span', {'class': 'B_NuCI'}) or soup.find('span', {'class': 'VU-ZEz'})
-                if title_elem:
-                    product_name = title_elem.text.strip()
+            try:
+                run = apify_client.actor("apify/cheerio-scraper").call(run_input=run_input)
+                items = list(apify_client.dataset(run.default_dataset_id).iterate_items())
+                
+                if items and items[0].get("product"):
+                    data = items[0]["product"]
+                    product_name = data.get("name", "Unknown Product")
+                    
+                    offers = data.get("offers", {})
+                    if isinstance(offers, list):
+                        offers = offers[0] if offers else {}
+                    price = offers.get("price", "Unknown")
+                    
+                    img = data.get("image", [])
+                    if isinstance(img, list) and len(img) > 0:
+                        product_image = img[0]
+                    elif isinstance(img, str):
+                        product_image = img
+                        
+                    reviews_list = []
+                    if isinstance(data.get("review"), list):
+                        for r in data.get("review"):
+                            if "reviewBody" in r:
+                                reviews_list.append(r["reviewBody"])
+                                
                     llm_context_dict = {
                         "title": product_name,
-                        "description": "Extracted from HTML fallback.",
-                        "price": "Unknown",
+                        "description": data.get("description", ""),
+                        "price": price,
+                        "currency": offers.get("priceCurrency", "INR"),
+                        "rating": data.get("aggregateRating", {}).get("ratingValue", 0),
+                        "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
+                        "reviews": reviews_list[:15]
                     }
                     llm_context = json.dumps(llm_context_dict)[:6000]
-            
-            if not llm_context:
-                return {"error": "Could not extract data from Flipkart URL"}
+                else:
+                    return {"error": "Could not extract data from Flipkart URL"}
+            except Exception as e:
+                return {"error": f"Scraper error: {str(e)}"}
                 
         else:
             # Apify Amazon Logic
