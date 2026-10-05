@@ -84,6 +84,17 @@ export default function Home() {
   
   const [clickCount, setClickCount] = useState(0);
 
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (isChatOpen) {
+      // Small timeout to allow framer-motion layout animation to calculate first
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [chatHistory, isChatting, isChatOpen]);
+
   const lastClickTime = React.useRef(0);
   const handleHeadphoneClick = () => {
     if (isExpanded) return;
@@ -600,9 +611,16 @@ export default function Home() {
       {result && !isAnalyzing && !error && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
           {/* Chat Window */}
-          <div 
-            className={`transition-all duration-300 origin-bottom-right mb-4 ${
-              isChatOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-75 opacity-0 pointer-events-none'
+          <motion.div 
+            layout
+            initial={false}
+            animate={{
+              scale: isChatOpen ? 1 : 0.75,
+              opacity: isChatOpen ? 1 : 0
+            }}
+            transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+            className={`origin-bottom-right mb-4 ${
+              isChatOpen ? 'pointer-events-auto' : 'pointer-events-none'
             } w-[380px] bg-white/90 backdrop-blur-md border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col`}
           >
             {/* Header */}
@@ -654,6 +672,7 @@ export default function Home() {
                   </div>
                 </div>
               )}
+              <div ref={chatEndRef} />
             </div>
             
             {/* Input */}
@@ -676,7 +695,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* FAB Button */}
           <button 
