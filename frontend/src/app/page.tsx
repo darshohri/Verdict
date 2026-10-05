@@ -622,7 +622,11 @@ export default function Home() {
             </div>
             
             {/* Messages */}
-            <div className="h-[400px] p-5 overflow-y-auto overscroll-contain flex flex-col gap-4 bg-white/50">
+            <div 
+              className="max-h-[60vh] p-5 overflow-y-auto flex flex-col gap-4 bg-white/50 scroll-smooth"
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
               {chatHistory.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                   <MessageSquare size={36} className="mb-4 text-[#FF4D15]" />
@@ -660,7 +664,7 @@ export default function Home() {
             
             {/* Input */}
             <div className="p-3 bg-white border-t border-zinc-100">
-              <div className="flex items-center gap-2 bg-zinc-50 rounded-xl p-1.5 border border-zinc-200 focus-within:border-[#FF4D15]/50 transition-colors">
+              <div className="flex items-center gap-2 bg-zinc-50 rounded-xl p-2 border border-zinc-200 focus-within:border-[#FF4D15]/50 transition-colors">
                 <input
                   type="text"
                   value={chatMessage}
