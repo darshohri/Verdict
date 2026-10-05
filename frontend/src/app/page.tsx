@@ -609,7 +609,7 @@ export default function Home() {
           <div 
             className={`transition-all duration-300 origin-bottom-right mb-4 ${
               isChatOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-75 opacity-0 pointer-events-none'
-            } w-[450px] bg-white/90 backdrop-blur-md border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col`}
+            } w-[380px] bg-white/90 backdrop-blur-md border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col`}
           >
             {/* Header */}
             <div className="p-5 flex items-center justify-between bg-gradient-to-r from-[#DCEBFA] to-white border-b border-zinc-100">
@@ -622,7 +622,7 @@ export default function Home() {
             </div>
             
             {/* Messages */}
-            <div className="h-[450px] p-5 overflow-y-auto flex flex-col gap-4 bg-white/50">
+            <div className="h-[400px] p-5 overflow-y-auto overscroll-contain flex flex-col gap-4 bg-white/50">
               {chatHistory.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                   <MessageSquare size={36} className="mb-4 text-[#FF4D15]" />
@@ -672,9 +672,9 @@ export default function Home() {
                 <button 
                   onClick={handleChat}
                   disabled={!chatMessage.trim() || isChatting}
-                  className="w-8 h-8 rounded-lg bg-black hover:bg-[#FF4D15] text-white flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                  className="w-8 h-8 flex items-center justify-center text-[#FF4D15] hover:text-[#FF6A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 >
-                  <Send size={14} className={chatMessage.trim() && !isChatting ? "ml-0.5" : ""} />
+                  <Send size={18} className={chatMessage.trim() && !isChatting ? "ml-0.5" : ""} />
                 </button>
               </div>
             </div>
