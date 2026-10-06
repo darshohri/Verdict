@@ -66,14 +66,20 @@ async def vercel_handler(request: Request):
 
             if is_flipkart:
                 parsed_url = urllib.parse.urlparse(url)
-                path_parts = parsed_url.path.strip("/").split("/")
-                if len(path_parts) > 0 and path_parts[0] not in ("p", "search", ""):
+                path_parts = [p for p in parsed_url.path.strip("/").split("/") if p]
+                
+                slug = None
+                if len(path_parts) > 2 and path_parts[1] == "p":
                     slug = path_parts[0]
+                elif len(path_parts) > 0 and path_parts[0] not in ("p", "search", "s"):
+                    slug = path_parts[0]
+
+                if slug:
                     keyword = slug.replace("-", "+")
                     scrape_url = f"https://www.amazon.in/s?k={keyword}"
                     is_flipkart_redirect = True
                 else:
-                    return {"error": "Could not parse the Flipkart product name from this URL. Please paste a direct product link."}
+                    return {"error": "Could not parse the exact product name from this Flipkart URL (it might be a short link or unsupported format). Please paste the full, direct product link."}
 
             # ── Scrape with Apify ─────────────────────────────────
             run_input = {
@@ -99,7 +105,10 @@ async def vercel_handler(request: Request):
                     return {"error": "Could not fetch equivalent product data from Amazon for this Flipkart URL."}
                 return {"error": "Could not extract data from the provided URL."}
 
-            product_data = items[0]
+            # If we searched, the first item might be a list page result, and the last item is the detail page.
+            product_detail_items = [item for item in items if item.get("description") or item.get("features")]
+            product_data = product_detail_items[0] if product_detail_items else items[-1]
+            
             product_name = product_data.get("title", "Unknown Product")
 
             high_res = product_data.get("highResolutionImages", [])
