@@ -590,15 +590,43 @@ export default function Home() {
                    <div className="w-2 h-8 bg-[#FF4D15] rounded-full" />
                    <h3 className="font-black tracking-widest uppercase text-lg text-zinc-900">Deep Dive</h3>
                  </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
-                   {result.supporting_evidence.map((evidence: string, idx: number) => {
-                      const cleanEvidence = evidence.replace(/^[\s\W]*(bullet point|point|bullet|-)[\s\W]*/gi, '');
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                   {result.supporting_evidence.map((evidence: any, idx: number) => {
+                      if (typeof evidence === 'string') {
+                        // Graceful fallback if LLM disobeys JSON schema
+                        const cleanEvidence = evidence.replace(/^[\s\W]*(bullet point|point|bullet|-)[\s\W]*/gi, '');
+                        return (
+                          <div key={idx} className="flex items-start gap-5 group">
+                            <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 group-hover:bg-[#FF4D15] mt-1.5 shrink-0 transition-colors duration-300 shadow-sm" />
+                            <p className="text-[15px] text-zinc-600 leading-relaxed font-medium">
+                              {cleanEvidence}
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      const isPositive = evidence.sentiment?.toLowerCase() === 'positive';
+                      const isNegative = evidence.sentiment?.toLowerCase() === 'negative';
+                      
                       return (
-                        <div key={idx} className="flex items-start gap-5 group">
-                          <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 group-hover:bg-[#FF4D15] mt-1.5 shrink-0 transition-colors duration-300 shadow-sm" />
-                          <p className="text-[15px] text-zinc-600 leading-relaxed font-medium">
-                            {cleanEvidence}
-                          </p>
+                        <div key={idx} className="flex items-start gap-5 group p-4 -ml-4 rounded-2xl hover:bg-zinc-50/80 transition-colors border border-transparent hover:border-zinc-100">
+                          <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
+                            isPositive ? 'bg-green-100 text-green-600' :
+                            isNegative ? 'bg-red-100 text-red-600' :
+                            'bg-amber-100 text-amber-600'
+                          }`}>
+                            {isPositive ? <CheckCircle2 size={16} strokeWidth={3} /> :
+                             isNegative ? <X size={16} strokeWidth={3} /> :
+                             <Minus size={16} strokeWidth={3} />}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-zinc-900 text-[15px] mb-1.5 flex items-center gap-2">
+                                {evidence.topic || 'Feature'}
+                            </h4>
+                            <p className="text-[14px] text-zinc-600 leading-relaxed">
+                              {evidence.summary}
+                            </p>
+                          </div>
                         </div>
                       );
                    })}

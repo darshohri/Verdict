@@ -230,7 +230,14 @@ You must return your analysis strictly as a JSON object matching the following s
     "cons_recap": ["<string>", ...],
     "price_trend_summary": "<string>",
     "review_authenticity_summary": "<string>",
-    "supporting_evidence": ["<string>", ...]
+    "supporting_evidence": [
+        {{
+            "topic": "<string> (e.g., Battery Life, Build Quality, Value)",
+            "summary": "<string> (1-sentence summary of what users think)",
+            "sentiment": "Positive" | "Neutral" | "Negative"
+        }}
+        // MUST identify and include at least 6 key features/topics from the reviews
+    ]
 }}
 
 Product Data:
