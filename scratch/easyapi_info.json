@@ -1,0 +1,139 @@
+{
+  "data": {
+    "id": "b1eFX3WpDTmd1PezM",
+    "userId": "vELc9qTTi4PFqNtFU",
+    "name": "flipkart-product-scraper",
+    "username": "easyapi",
+    "description": "Scrape product data from Flipkart search results, including prices, images, titles, and detailed product information. Perfect for price monitoring, market research, and competitive analysis.",
+    "isPublic": true,
+    "createdAt": "2025-02-12T03:47:26.569Z",
+    "modifiedAt": "2026-05-05T05:27:24.048Z",
+    "taggedBuilds": {
+      "latest": {
+        "buildId": "MWSQMc63ii7ZLIThu",
+        "finishedAt": "2025-09-05T01:10:50.803Z",
+        "buildNumberInt": 4,
+        "buildNumber": "0.0.4"
+      }
+    },
+    "stats": {
+      "totalBuilds": 4,
+      "totalRuns": 1568,
+      "totalUsers": 342,
+      "totalUsers7Days": 4,
+      "totalUsers30Days": 28,
+      "totalUsers90Days": 74,
+      "lastRunStartedAt": "2026-10-06T09:53:49.198Z",
+      "publicActorRunStats30Days": {
+        "ABORTED": 18,
+        "FAILED": 5,
+        "SUCCEEDED": 45,
+        "TIMED-OUT": 1,
+        "TOTAL": 69
+      },
+      "actorReviewCount": 4,
+      "actorReviewRating": 4.258934188222266,
+      "bookmarkCount": 2
+    },
+    "versions": [
+      {
+        "versionNumber": "0.0",
+        "sourceType": "SOURCE_FILES",
+        "buildTag": "latest"
+      }
+    ],
+    "defaultRunOptions": {
+      "build": "latest",
+      "timeoutSecs": 36000,
+      "memoryMbytes": 2048
+    },
+    "exampleRunInput": {
+      "body": "{ \"helloWorld\": 123 }",
+      "contentType": "application/json; charset=utf-8"
+    },
+    "categories": [
+      "ECOMMERCE",
+      "LEAD_GENERATION",
+      "INTEGRATIONS"
+    ],
+    "isDeprecated": false,
+    "title": "Flipkart Product Scraper \ud83d\udecd\ufe0f",
+    "pictureUrl": "https://apify-image-uploads-prod.s3.us-east-1.amazonaws.com/vELc9qTTi4PFqNtFU-actor-b1eFX3WpDTmd1PezM-JKxMhHTEuK-flipkart-logo.jpg",
+    "seoTitle": null,
+    "seoDescription": null,
+    "pricingInfos": [
+      {
+        "pricingModel": "FLAT_PRICE_PER_MONTH",
+        "reasonForChange": null,
+        "pricePerUnitUsd": 19.99,
+        "trialMinutes": 120,
+        "createdAt": "2025-02-12T03:53:04.363Z",
+        "startedAt": "2025-02-12T03:53:04.363Z",
+        "apifyMarginPercentage": 0.2,
+        "notifiedAboutChangeAt": "2025-02-12T04:09:19.206Z"
+      },
+      {
+        "minimalMaxTotalChargeUsd": null,
+        "isPPEPlatformUsagePaidByUser": true,
+        "pricingModel": "PAY_PER_EVENT",
+        "isPriceChangeNotificationSuppressed": false,
+        "pricingPerEvent": {
+          "actorChargeEvents": {
+            "apify-actor-start": {
+              "eventTitle": "Actor Start",
+              "eventDescription": "Charged when the Actor starts running. Number of events charged depends on Actor memory (one event per GB, minimum one event).",
+              "isOneTimeEvent": true,
+              "eventPriceUsd": 5e-05
+            },
+            "apify-default-dataset-item": {
+              "eventTitle": "result",
+              "eventDescription": "Single result in the default dataset.",
+              "eventPriceUsd": 0.00299,
+              "isPrimaryEvent": true
+            }
+          }
+        },
+        "startedAt": "2026-03-30T07:29:36.025Z",
+        "createdAt": "2026-03-16T07:29:36.789Z",
+        "apifyMarginPercentage": 0.2,
+        "notifiedAboutFutureChangeAt": "2026-03-16T07:29:57.201Z"
+      },
+      {
+        "minimalMaxTotalChargeUsd": null,
+        "isPPEPlatformUsagePaidByUser": true,
+        "pricingModel": "PAY_PER_EVENT",
+        "isPriceChangeNotificationSuppressed": false,
+        "pricingPerEvent": {
+          "actorChargeEvents": {
+            "apify-default-dataset-item": {
+              "eventTitle": "result",
+              "eventDescription": "Single result in the default dataset.",
+              "isOneTimeEvent": false,
+              "eventPriceUsd": 0.00299,
+              "isPrimaryEvent": true
+            },
+            "apify-actor-start": {
+              "eventTitle": "Actor Start",
+              "eventDescription": "Charged when the Actor starts running. Number of events charged depends on Actor memory (one event per GB, minimum one event).",
+              "isOneTimeEvent": true,
+              "eventPriceUsd": 0.09
+            }
+          }
+        },
+        "startedAt": "2026-05-19T05:27:19.759Z",
+        "createdAt": "2026-05-05T05:27:24.051Z",
+        "apifyMarginPercentage": 0.2,
+        "notifiedAboutFutureChangeAt": "2026-05-05T05:27:45.013Z"
+      }
+    ],
+    "notice": "NONE",
+    "isCritical": false,
+    "isGeneric": false,
+    "hasNoDataset": false,
+    "isSourceCodeHidden": true,
+    "standbyUrl": null,
+    "actorPermissionLevel": "LIMITED_PERMISSIONS",
+    "readmeSummary": "## Flipkart Product Scraper\n\nScrapes Flipkart search-result pages to extract detailed product information for price monitoring, cataloging, competition analysis, and e-commerce analytics. The Actor collects real-time pricing and discount data, product titles and brand metadata, full media assets (images and videos), textual descriptions, category and subcategory taxonomy, product flags (wishlist/chat/offer indicators), buyability/availability status, and embedded product analytics; records include numeric pricing values, discount amounts, media URLs, categorical labels, boolean flags and timestamps. Built for high-throughput scraping with proxy support and anti-blocking measures, it processes multiple search pages and returns structured product records optimized for full-text and semantic search.\n\n## Use cases\n\n- Price monitoring and tracking  \n- Market research and analysis  \n- Competition monitoring  \n- Product catalog building  \n- Inventory tracking  \n- E-commerce analytics",
+    "deploymentKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmEdGavYGNM5TG9tqhYhxYqFheY3oLAZqSoC9yzvecJr0IJgdqmAbABkxB5h6dArsGK/Z/3jOMe1Aijrn00jFxmoZLwbC9xwgq9xl0je27CUzkY1Kqx3avMenLLTTr8Z1OMvZzfPibJc63L7Ior2CATxSM1espu4WokYG40yR3EJ5jj797J4QwbnXJ1yJ/xBnOyCnblwFcxg8az0E35kG3FHKz9nTOneRCoCLPHf+zHKqoW6zuJmyTNw+JWITUXNNEQyCV3n5oMRoLx6hWodh+PyQCJZt3++6kYl6fDDOoc4/qgIganDgiOfa/DOTElJ/GCqFa9mUIjHsfiM0HMwUn \n"
+  }
+}

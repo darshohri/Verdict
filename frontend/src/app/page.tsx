@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X, Clock, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
@@ -246,13 +246,42 @@ export default function Home() {
     }
   };
 
-  const getVerdictColor = (verdict: string) => {
-    switch (verdict?.toUpperCase()) {
-      case 'BUY': return 'bg-[#00E573] text-black shadow-[0_0_30px_rgba(0,229,115,0.5)] ring-4 ring-offset-2 ring-[#00E573]/30';
-      case 'WAIT': return 'bg-[#FFB800] text-black shadow-[0_0_30px_rgba(255,184,0,0.5)] ring-4 ring-offset-2 ring-[#FFB800]/30';
+  const getVerdictGlassStyle = (verdict: string) => {
+    const v = verdict?.toUpperCase();
+    switch (v) {
+      case 'BUY':
+        return {
+          glow: 'shadow-[0_8px_32px_rgba(16,185,129,0.18)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.28)] border-emerald-500/30',
+          textColor: 'text-emerald-600',
+          iconColor: 'text-emerald-600',
+          iconBg: 'bg-emerald-500/15 border-emerald-500/30',
+          Icon: CheckCircle2,
+        };
+      case 'WAIT':
+        return {
+          glow: 'shadow-[0_8px_32px_rgba(245,158,11,0.18)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.28)] border-amber-500/30',
+          textColor: 'text-amber-600',
+          iconColor: 'text-amber-600',
+          iconBg: 'bg-amber-500/15 border-amber-500/30',
+          Icon: Clock,
+        };
       case 'PASS':
-      case 'AVOID': return 'bg-[#FF3366] text-white shadow-[0_0_30px_rgba(255,51,102,0.5)] ring-4 ring-offset-2 ring-[#FF3366]/30';
-      default: return 'bg-zinc-800 text-white shadow-lg';
+      case 'AVOID':
+        return {
+          glow: 'shadow-[0_8px_32px_rgba(244,63,94,0.18)] hover:shadow-[0_12px_40px_rgba(244,63,94,0.28)] border-rose-500/30',
+          textColor: 'text-rose-600',
+          iconColor: 'text-rose-600',
+          iconBg: 'bg-rose-500/15 border-rose-500/30',
+          Icon: AlertTriangle,
+        };
+      default:
+        return {
+          glow: 'shadow-[0_8px_32px_rgba(113,113,122,0.18)] hover:shadow-[0_12px_40px_rgba(113,113,122,0.28)] border-zinc-500/30',
+          textColor: 'text-zinc-700',
+          iconColor: 'text-zinc-600',
+          iconBg: 'bg-zinc-500/15 border-zinc-500/30',
+          Icon: Sparkles,
+        };
     }
   };
 
@@ -496,10 +525,33 @@ export default function Home() {
                       {result.product_name || "Unknown Product"}
                     </h3>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                      <div className={`px-10 py-4 rounded-full text-lg md:text-xl font-black tracking-[0.15em] transition-transform hover:-translate-y-1 ${getVerdictColor(result.verdict)}`}>
-                        VERDICT: {result.verdict}
-                      </div>
+                      {(() => {
+                        const style = getVerdictGlassStyle(result.verdict);
+                        const IconComp = style.Icon;
+                        return (
+                          <div className={`relative group inline-flex items-center gap-3.5 px-6 py-3.5 rounded-full bg-white/50 backdrop-blur-2xl backdrop-saturate-150 border ${style.glow} shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.9)] transition-all duration-300 hover:-translate-y-0.5`}>
+                            <div className={`w-8 h-8 rounded-full ${style.iconBg} border flex items-center justify-center shrink-0 shadow-sm`}>
+                              <IconComp className={`w-4 h-4 ${style.iconColor}`} strokeWidth={2.5} />
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-[11px] font-bold tracking-[0.25em] text-zinc-400 uppercase">
+                                VERDICT
+                              </span>
+                              <span className="w-1 h-3.5 rounded-full bg-zinc-300/70" />
+                              <span className={`text-base md:text-lg font-black tracking-wider ${style.textColor}`}>
+                                {result.verdict}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
+                      {result.confidence_score !== undefined && (
+                        <div className="inline-flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-white/40 backdrop-blur-xl border border-white/80 shadow-[0_4px_20px_0_rgba(0,0,0,0.03),_inset_0_1px_1px_0_rgba(255,255,255,0.9)] text-xs font-bold tracking-wider text-zinc-600">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>{result.confidence_score}% CONFIDENCE</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
