@@ -109,6 +109,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
               tickLine={false} 
               tick={{ fill: '#A1A1AA', fontSize: 12 }}
               dy={10}
+              padding={{ left: 20, right: 20 }}
             />
             <YAxis 
               domain={[minPrice * 0.9, maxPrice * 1.1]} 
