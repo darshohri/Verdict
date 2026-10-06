@@ -167,21 +167,15 @@ export default function Home() {
     const trimmedUrl = url.trim().toLowerCase();
     const cleanedUrl = trimmedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
     
+    // Only reject bare homepages — let the backend handle deeper validation
     if (cleanedUrl === 'amazon.com' || cleanedUrl === 'amazon.in' || cleanedUrl === 'flipkart.com') {
       setError("Please paste a link to a specific product (e.g. amazon.com/dp/B08X...), not the store's homepage.");
       return;
     }
     
-    const isAmazonFullDomain = cleanedUrl.startsWith('amazon.com/') || cleanedUrl.startsWith('amazon.in/');
-    const isFlipkartFullDomain = cleanedUrl.startsWith('flipkart.com/');
-    
-    if (isAmazonFullDomain && !cleanedUrl.includes('/dp/') && !cleanedUrl.includes('/gp/') && !cleanedUrl.includes('/product/')) {
-      setError("Oops! We couldn't find a valid product at this URL. Please make sure you entered a real, existing product link.");
-      return;
-    }
-    
-    if (isFlipkartFullDomain && !cleanedUrl.includes('/p/') && !cleanedUrl.includes('pid=')) {
-      setError("Oops! We couldn't find a valid product at this URL. Please make sure you entered a real, existing product link.");
+    const isSupported = cleanedUrl.startsWith('amazon.com/') || cleanedUrl.startsWith('amazon.in/') || cleanedUrl.startsWith('flipkart.com/');
+    if (!isSupported) {
+      setError("Hold up! Verdict currently only supports Amazon and Flipkart product links. Please drop a valid link from either of those stores.");
       return;
     }
     

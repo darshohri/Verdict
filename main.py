@@ -1,6 +1,10 @@
 import os
 import json
-import asyncio
+import re
+import random
+import hashlib
+import urllib.parse
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -21,206 +25,103 @@ groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 app = FastAPI()
 
+
 class EvaluateRequest(BaseModel):
     search_query: str
+
 
 class ChatRequest(BaseModel):
     message: str
     context: str = ""
 
+
 @app.post("/api/v1/verdict/evaluate")
 async def evaluate(request: EvaluateRequest):
     if not apify_client or not groq_client:
         raise HTTPException(status_code=500, detail="API keys not configured")
-        
-    url = request.search_query
-    is_flipkart = "flipkart.com" in url.lower()
-    is_amazon = "amazon.in" in url.lower() or "amazon.com" in url.lower()
-    
-    if not is_flipkart and not is_amazon:
-        return {"error": "Hold up! Verdict currently only supports Amazon and Flipkart product links. Please drop a valid link from either of those stores to get your analysis!"}
-        
+
+    url = request.search_query.strip()
+
+    # Ensure URL has a scheme
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "https://" + url
-        request.search_query = url
-        
-    # 1. Use Apify to scrape the product
-    # Note: We use the junglee/free-amazon-product-scraper actor
-    run_input = {
-        "categoryUrls": [{ "url": request.search_query }],
-        "maxItemsPerStartUrl": 1,
-        "maxSearchPagesPerStartUrl": 1,
-        "maxProductVariantsAsSeparateResults": 0,
-        "useCaptchaSolver": False,
-        "scrapeProductVariantPrices": False,
-        "scrapeProductDetails": True,
-    }
+
+    is_flipkart = "flipkart.com" in url.lower()
+    is_amazon = "amazon.in" in url.lower() or "amazon.com" in url.lower()
+
+    if not is_flipkart and not is_amazon:
+        return {
+            "error": "Hold up! Verdict currently only supports Amazon and Flipkart product links. "
+                     "Please drop a valid link from either of those stores to get your analysis!"
+        }
 
     try:
-        url = request.search_query
-        
-        # Determine if it's a Flipkart or Amazon URL
-        is_flipkart = "flipkart.com" in url.lower()
-        
-        product_name = "Unknown Product"
-        product_image = ""
-        llm_context = ""
-        
+        # ── Flipkart → Amazon search redirect ─────────────────────
+        scrape_url = url
+        is_flipkart_redirect = False
+
         if is_flipkart:
-            if not apify_client:
-                return {"error": "Apify token missing in environment for Flipkart scraping"}
-                
-            run_input = {
-                "startUrls": [{"url": url}],
-                "pageFunction": """
-                    async function pageFunction(context) {
-                        const { $, request, log } = context;
-                        let product = {};
-                        $('script[type="application/ld+json"]').each((i, el) => {
-                            try {
-                                let data = JSON.parse($(el).html());
-                                if (Array.isArray(data)) data = data[0];
-                                if (data['@type'] === 'Product') {
-                                    product = data;
-                                }
-                            } catch(e) {}
-                        });
-                        
-                        // Fallback manual DOM extraction
-                        if (!product.name) {
-                            product.name = $('span.VU-Tz5').text().trim() || $('span.B_NuCI').text().trim() || $('h1').text().trim();
-                        }
-                        if (!product.image) {
-                            product.image = $('img._396cs4, img._2r_T1I, img.v2-Aam').attr('src');
-                        }
-                        
-                        // Extract Price
-                        const priceText = $('div.Nx9bqj.CrvsUO').text().trim() || $('div._30jeq3._16Jk6d').text().trim();
-                        if (priceText) {
-                            product.offers = product.offers || {};
-                            product.offers.price = priceText;
-                            product.offers.priceCurrency = 'INR';
-                        }
-                        
-                        // Extract Ratings & Reviews Count
-                        const ratingText = $('div.ipqd2A, div._3LWZlK, div.XQDdHH').first().text().trim();
-                        const reviewsText = $('span.Wphh3N, span._2_R_DZ').first().text().trim();
-                        if (ratingText || reviewsText) {
-                            product.aggregateRating = product.aggregateRating || {};
-                            if (ratingText) product.aggregateRating.ratingValue = ratingText;
-                            if (reviewsText) {
-                                 const revCount = reviewsText.replace(/[^0-9]/g, '');
-                                 if (revCount) product.aggregateRating.reviewCount = revCount;
-                            }
-                        }
-                        
-                        // Extract Description & Highlights
-                        if (!product.description) {
-                            const desc = $('div.yN\\\\+eNk, div._1mXcCf').text().trim();
-                            const highlights = [];
-                            $('ul.GNDEQ- li, ul._1mXcCf li, div.X3BRps li').each((i, el) => {
-                                highlights.push($(el).text().trim());
-                            });
-                            product.description = desc + " " + highlights.join(". ");
-                        }
-                        
-                        // Extract Review Bodies
-                        let reviewList = product.review || [];
-                        if (!Array.isArray(reviewList)) {
-                            reviewList = [reviewList];
-                        }
-                        if (reviewList.length === 0) {
-                            $('div.Zmyqri, div.t-ZTKy').each((i, el) => {
-                                reviewList.push({ reviewBody: $(el).text().trim() });
-                            });
-                            if (reviewList.length > 0) {
-                                product.review = reviewList;
-                            }
-                        }
+            parsed_url = urllib.parse.urlparse(url)
+            path_parts = parsed_url.path.strip("/").split("/")
+            if len(path_parts) > 0 and path_parts[0] not in ("p", "search", ""):
+                slug = path_parts[0]
+                keyword = slug.replace("-", "+")
+                scrape_url = f"https://www.amazon.in/s?k={keyword}"
+                is_flipkart_redirect = True
+            else:
+                return {"error": "Could not parse the Flipkart product name from this URL. Please paste a direct product link."}
 
-                        return { product };
-                    }
-                """,
-                "proxyConfiguration": { "useApifyProxy": True }
-            }
-            
-            try:
-                run = apify_client.actor("apify/cheerio-scraper").call(run_input=run_input)
-                dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
-                items = list(apify_client.dataset(dataset_id).iterate_items())
-                
-                if items and items[0].get("product"):
-                    data = items[0]["product"]
-                    product_name = data.get("name", "Unknown Product")
-                    
-                    offers = data.get("offers", {})
-                    if isinstance(offers, list):
-                        offers = offers[0] if offers else {}
-                    price = offers.get("price", "Unknown")
-                    
-                    img = data.get("image", [])
-                    if isinstance(img, list) and len(img) > 0:
-                        product_image = img[0]
-                    elif isinstance(img, str):
-                        product_image = img
-                        
-                    reviews_list = []
-                    if isinstance(data.get("review"), list):
-                        for r in data.get("review"):
-                            if "reviewBody" in r:
-                                reviews_list.append(r["reviewBody"])
-                                
-                    llm_context_dict = {
-                        "title": product_name,
-                        "description": data.get("description", ""),
-                        "price": price,
-                        "currency": offers.get("priceCurrency", "INR"),
-                        "rating": data.get("aggregateRating", {}).get("ratingValue", 0),
-                        "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
-                        "reviews": reviews_list[:15]
-                    }
-                    llm_context = json.dumps(llm_context_dict)[:6000]
-                else:
-                    return {"error": "Could not extract data from Flipkart URL"}
-            except Exception as e:
-                return {"error": f"Scraper error: {str(e)}"}
-                
+        # ── Scrape with Apify ─────────────────────────────────────
+        run_input = {
+            "categoryUrls": [{"url": scrape_url}],
+            "maxItemsPerStartUrl": 1,
+            "maxSearchPagesPerStartUrl": 1,
+            "maxProductVariantsAsSeparateResults": 0,
+            "useCaptchaSolver": False,
+            "scrapeProductVariantPrices": False,
+            "scrapeProductDetails": True,
+        }
+
+        run = apify_client.actor("junglee/free-amazon-product-scraper").call(run_input=run_input)
+        dataset_id = (
+            run.get("defaultDatasetId")
+            if isinstance(run, dict)
+            else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
+        )
+        items = list(apify_client.dataset(dataset_id).iterate_items())
+
+        if not items:
+            if is_flipkart_redirect:
+                return {"error": "Could not fetch equivalent product data from Amazon for this Flipkart URL."}
+            return {"error": "Could not extract data from the provided URL."}
+
+        product_data = items[0]
+        product_name = product_data.get("title", "Unknown Product")
+
+        high_res = product_data.get("highResolutionImages", [])
+        product_image = high_res[0] if high_res else product_data.get("thumbnailImage", "")
+
+        price_val = product_data.get("price")
+        if isinstance(price_val, dict):
+            price = price_val.get("value", "Unknown")
+            currency = price_val.get("currency", "INR")
         else:
-            # Apify Amazon Logic
-            run_input = {
-                "categoryUrls": [{ "url": url }],
-                "maxItemsPerStartUrl": 1,
-                "maxSearchPagesPerStartUrl": 1,
-                "maxProductVariantsAsSeparateResults": 0,
-                "useCaptchaSolver": False,
-                "scrapeProductVariantPrices": False,
-                "scrapeProductDetails": True,
-            }
+            price = price_val if price_val is not None else "Unknown"
+            currency = product_data.get("currency", "INR")
 
-            run = apify_client.actor("junglee/free-amazon-product-scraper").call(run_input=run_input)
-            dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
-            items = list(apify_client.dataset(dataset_id).iterate_items())
-            if not items:
-                return {"error": "Could not extract data from the provided URL"}
-                
-            product_data = items[0]
-            product_name = product_data.get("title", "Unknown Product")
-            
-            high_res = product_data.get("highResolutionImages", [])
-            product_image = high_res[0] if high_res else product_data.get("thumbnailImage", "")
-            
-            llm_context_dict = {
-                "title": product_name,
-                "description": product_data.get("description", ""),
-                "price": product_data.get("price", {}),
-                "currency": product_data.get("currency", "USD"),
-                "bullets": product_data.get("bullets", []),
-                "rating": product_data.get("rating", 0),
-                "reviewsCount": product_data.get("reviewsCount", 0)
-            }
-            llm_context = json.dumps(llm_context_dict)[:6000]
+        llm_context_dict = {
+            "title": product_name,
+            "description": product_data.get("description", ""),
+            "price": price,
+            "currency": currency,
+            "bullets": product_data.get("features", []),
+            "rating": product_data.get("stars", 0),
+            "reviewsCount": product_data.get("reviewsCount", 0),
+        }
+        llm_context = json.dumps(llm_context_dict)[:6000]
 
-        prompt = f"""
+        # ── LLM analysis via Groq ─────────────────────────────────
+        prompt = f"""\
 You are an expert product analyst. Based on the following product data, generate a comprehensive evaluation report.
 You must return your analysis strictly as a JSON object matching the following structure exactly, without any markdown formatting like ```json.
 
@@ -246,22 +147,15 @@ Product Data:
 {llm_context}
 """
 
-        # 3. Call Groq with LLM for fast, structured output
         completion = groq_client.chat.completions.create(
             model="openai/gpt-oss-120b",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            response_format={"type": "json_object"}
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
         )
-        
+
         llm_response_text = completion.choices[0].message.content
         llm_response = json.loads(llm_response_text)
-        
-        # Combine everything
+
         return {
             "product_name": product_name,
             "product_image": product_image,
@@ -273,84 +167,79 @@ Product Data:
             "cons_recap": llm_response.get("cons_recap", []),
             "price_trend_summary": llm_response.get("price_trend_summary", "No price data."),
             "review_authenticity_summary": llm_response.get("review_authenticity_summary", "No review data."),
-            "supporting_evidence": llm_response.get("supporting_evidence", [])
+            "supporting_evidence": llm_response.get("supporting_evidence", []),
         }
-        
+
     except Exception as e:
         print(f"Error during evaluation: {e}")
         return {"error": f"Evaluation failed: {str(e)}"}
 
-@app.get("/api/index")
+
 @app.get("/api/v1/verdict/price-history")
 async def price_history(url: str = "", current_price: str = ""):
     if not url:
         return {"error": "URL parameter missing"}
-        
+
     is_flipkart = "flipkart.com" in url.lower()
     is_amazon = "amazon.in" in url.lower() or "amazon.com" in url.lower()
-    
+
     if not is_flipkart and not is_amazon:
         return {"error": "Invalid URL"}
-        
-    import random
-    import hashlib
-    import re
-    from datetime import datetime, timedelta
-    
+
     # Deterministic seed based on URL so chart doesn't change on refresh
     seed = int(hashlib.md5(url.encode()).hexdigest(), 16)
     random.seed(seed)
-    
+
     parsed_price = 0.0
     if current_price:
-        match = re.search(r'[\d,]+(?:\.\d+)?', str(current_price))
+        match = re.search(r"[\d,]+(?:\.\d+)?", str(current_price))
         if match:
             try:
-                parsed_price = float(match.group().replace(',', ''))
-            except:
+                parsed_price = float(match.group().replace(",", ""))
+            except ValueError:
                 pass
-                
+
     base_price = parsed_price if parsed_price > 0 else (150.00 if is_amazon else 1500.00)
-    
+
     history = []
-    
     for i in range(6, -1, -1):
-        dt = (datetime.now() - timedelta(days=30*i)).strftime("%b %Y")
+        dt = (datetime.now() - timedelta(days=30 * i)).strftime("%b %Y")
         if i == 0:
-            price = round(base_price, 2)
+            p = round(base_price, 2)
         else:
-            price = round(base_price * (1 + random.uniform(-0.15, 0.2)), 2)
-        history.append({
-            "date": dt,
-            "price": price
-        })
-        
+            p = round(base_price * (1 + random.uniform(-0.15, 0.2)), 2)
+        history.append({"date": dt, "price": p})
+
     return {"history": history}
+
 
 @app.post("/api/v1/verdict/chat")
 async def chat(request: ChatRequest):
     if not groq_client:
         raise HTTPException(status_code=500, detail="Groq API key not configured")
-        
+
     try:
         completion = groq_client.chat.completions.create(
             model="qwen/qwen3.8-27b",
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are the ultimate AI shopping assistant for Verdict. Your goal is to provide the BEST, most insightful, and highly structured answers possible. Always use Markdown to format your response beautifully: use bullet points for lists, bold text for emphasis, and paragraphs to separate ideas. Keep your tone highly conversational and professional.\n\nUse this product context if the user asks about the product they are viewing:\n{request.context}"
+                    "content": (
+                        "You are the ultimate AI shopping assistant for Verdict. "
+                        "Your goal is to provide the BEST, most insightful, and highly structured answers possible. "
+                        "Always use Markdown to format your response beautifully: use bullet points for lists, "
+                        "bold text for emphasis, and paragraphs to separate ideas. "
+                        "Keep your tone highly conversational and professional.\n\n"
+                        f"Use this product context if the user asks about the product they are viewing:\n{request.context}"
+                    ),
                 },
-                {
-                    "role": "user",
-                    "content": request.message
-                }
-            ]
+                {"role": "user", "content": request.message},
+            ],
         )
-        return {
-            "response": completion.choices[0].message.content
-        }
+        return {"response": completion.choices[0].message.content}
     except Exception as e:
         return {"response": "Sorry, I am having trouble connecting to the network right now."}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
