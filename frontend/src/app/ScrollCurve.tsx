@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 
 /**
  * ScrollCurve — draws a sweeping bezier as the user scrolls.
@@ -10,9 +10,21 @@ import { motion, useScroll, useTransform } from "framer-motion";
  * the results animation, then uses clean scroll tracking.
  */
 function ScrollCurveInner({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress, scrollY } = useScroll({
     target: containerRef,
     offset: ["start 0.3", "end end"],
+  });
+
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  // Prevent the curve from appearing until the user actually scrolls down.
+  // This completely fixes the layout-glitch when switching tabs.
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 50 && !hasScrolled) {
+      setHasScrolled(true);
+    } else if (latest <= 50 && hasScrolled) {
+      setHasScrolled(false);
+    }
   });
 
   const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
@@ -39,7 +51,7 @@ function ScrollCurveInner({ containerRef }: { containerRef: React.RefObject<HTML
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
       style={{ zIndex: 0 }}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      animate={{ opacity: hasScrolled ? 1 : 0 }}
       transition={{ duration: 0.8, ease: "easeIn" }}
     >
       {/* Soft outer glow */}
