@@ -70,7 +70,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-zinc-900 text-white px-4 py-2 rounded-xl shadow-xl border border-zinc-800 text-sm">
+        <div className="bg-zinc-900 text-white px-4 py-2 rounded-xl shadow-xl border border-zinc-800 text-sm pointer-events-none">
           <p className="font-bold mb-1">{label}</p>
           <p className="text-[#FF4D15] font-semibold">
             {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(payload[0].value).replace('INR', '₹')}
@@ -119,6 +119,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
               content={<CustomTooltip />} 
               cursor={{ stroke: '#E4E4E7', strokeWidth: 2, strokeDasharray: '5 5' }}
               isAnimationActive={false}
+              wrapperStyle={{ pointerEvents: 'none' }}
             />
             <Area 
               type="monotone" 
