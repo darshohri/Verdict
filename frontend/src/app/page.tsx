@@ -519,7 +519,7 @@ export default function Home() {
                 </h2>
               </motion.div>
 
-              <PriceChart url={url} />
+              <PriceChart url={url} price={result.product_price} />
 
               {/* Grid Layout for details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16">

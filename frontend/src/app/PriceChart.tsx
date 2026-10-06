@@ -12,9 +12,10 @@ interface PriceData {
 
 interface PriceChartProps {
   url: string;
+  price?: string | null;
 }
 
-export default function PriceChart({ url }: PriceChartProps) {
+export default function PriceChart({ url, price }: PriceChartProps) {
   const [data, setData] = useState<PriceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function PriceChart({ url }: PriceChartProps) {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/index?action=price-history&url=${encodeURIComponent(url)}`);
+        const response = await fetch(`/api/index?action=price-history&url=${encodeURIComponent(url)}&current_price=${encodeURIComponent(price || '')}`);
         const result = await response.json();
         if (result.error) {
           setError(result.error);
@@ -38,7 +39,7 @@ export default function PriceChart({ url }: PriceChartProps) {
       }
     }
     fetchHistory();
-  }, [url]);
+  }, [url, price]);
 
   if (loading) {
     return (
@@ -95,7 +96,7 @@ export default function PriceChart({ url }: PriceChartProps) {
       
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#FF4D15" stopOpacity={0.3}/>

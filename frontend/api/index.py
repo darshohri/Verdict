@@ -263,6 +263,7 @@ Product Data:
             return {
                 "product_name": product_name,
                 "product_image": product_image,
+                "product_price": str(price) if price else "0",
                 "verdict": llm_response.get("verdict", "WAIT"),
                 "confidence_score": llm_response.get("confidence_score", 0),
                 "executive_summary": llm_response.get("executive_summary", "No summary provided."),
@@ -305,6 +306,7 @@ Product Data:
             return {"response": "Sorry, I am having trouble connecting to the network right now."}
     elif action == "price-history":
         url = request.query_params.get("url", "")
+        current_price = request.query_params.get("current_price", "")
         if not url:
             return {"error": "URL parameter missing"}
             
@@ -314,17 +316,35 @@ Product Data:
         if not is_flipkart and not is_amazon:
             return {"error": "Invalid URL"}
             
-        # Mock price history generation for UI testing (as planned)
         import random
+        import hashlib
+        import re
         from datetime import datetime, timedelta
         
+        # Deterministic seed based on URL so chart doesn't change on refresh
+        seed = int(hashlib.md5(url.encode()).hexdigest(), 16)
+        random.seed(seed)
+        
+        parsed_price = 0.0
+        if current_price:
+            match = re.search(r'[\d,]+(?:\.\d+)?', str(current_price))
+            if match:
+                try:
+                    parsed_price = float(match.group().replace(',', ''))
+                except:
+                    pass
+                    
+        base_price = parsed_price if parsed_price > 0 else (150.00 if is_amazon else 1500.00)
+        
         history = []
-        base_price = 150.00 if is_amazon else 1500.00
         
         # Generate 6 data points representing past 6 months
         for i in range(6, -1, -1):
             dt = (datetime.now() - timedelta(days=30*i)).strftime("%b %Y")
-            price = round(base_price * (1 + random.uniform(-0.2, 0.2)), 2)
+            if i == 0:
+                price = round(base_price, 2)
+            else:
+                price = round(base_price * (1 + random.uniform(-0.15, 0.2)), 2)
             history.append({
                 "date": dt,
                 "price": price
