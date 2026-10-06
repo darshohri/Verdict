@@ -85,7 +85,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm relative overflow-hidden group mb-16"
+      className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm relative group mb-16"
     >
       <div className="flex items-center gap-4 mb-8">
         <div className="w-10 h-10 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-800">
@@ -96,7 +96,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
       
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 50, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#FF4D15" stopOpacity={0.3}/>
@@ -109,13 +109,17 @@ export default function PriceChart({ url, price }: PriceChartProps) {
               tickLine={false} 
               tick={{ fill: '#A1A1AA', fontSize: 12 }}
               dy={10}
-              padding={{ left: 20, right: 20 }}
+              padding={{ left: 20, right: 40 }}
             />
             <YAxis 
               domain={[minPrice * 0.9, maxPrice * 1.1]} 
               hide={true} 
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#E4E4E7', strokeWidth: 2, strokeDasharray: '5 5' }} />
+            <Tooltip 
+              content={<CustomTooltip />} 
+              cursor={{ stroke: '#E4E4E7', strokeWidth: 2, strokeDasharray: '5 5' }}
+              isAnimationActive={false}
+            />
             <Area 
               type="monotone" 
               dataKey="price" 
@@ -124,6 +128,7 @@ export default function PriceChart({ url, price }: PriceChartProps) {
               fillOpacity={1} 
               fill="url(#colorPrice)" 
               animationDuration={1500}
+              activeDot={{ r: 6, strokeWidth: 0, fill: '#FF4D15' }}
             />
           </AreaChart>
         </ResponsiveContainer>
