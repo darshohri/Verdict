@@ -1,0 +1,98 @@
+{
+  "product": {
+    "name": "Apple iPhone 13 (Starlight, 128 GB)",
+    "description": "Buy Apple iPhone 13 online at best price with offers in India. Apple iPhone 13 (Starlight, 128 GB) features and specifications include 128 GB ROM, 3240 mAh Battery, 12 MP back camera and 12 MP front camera. Compare iPhone 13 by price and performance to shop at Flipkart",
+    "image": [
+      "https://rukmini1.flixcart.com/image/1500/1500/xif0q/mobile/6/n/d/iphone-13-mlpg3hn-a-apple-resized-original-imag6vpyghayhhrh.jpeg?q=70",
+      "https://rukmini1.flixcart.com/image/1500/1500/ktketu80/mobile/a/z/g/iphone-13-mlpg3hn-a-apple-original-imag6vpyxhzdccrc.jpeg?q=70",
+      "https://rukmini1.flixcart.com/image/1500/1500/ktketu80/mobile/y/g/j/iphone-13-mlpg3hn-a-apple-original-imag6vpyfftrfbzu.jpeg?q=70",
+      "https://rukmini1.flixcart.com/image/1500/1500/xif0q/mobile/h/e/g/-original-imagh7g8k7ttcdkc.jpeg?q=70",
+      "https://rukmini1.flixcart.com/image/1500/1500/xif0q/mobile/w/k/h/-original-imagh2gwxu57j4fn.jpeg?q=70"
+    ],
+    "sku": "MOBG6VF5ADKHKXFX",
+    "color": "Starlight",
+    "category": "mobile",
+    "aggregateRating": {
+      "ratingValue": 4.6,
+      "reviewCount": 13423,
+      "ratingCount": 263182,
+      "@type": "AggregateRating"
+    },
+    "brand": {
+      "name": "APPLE",
+      "@type": "Brand"
+    },
+    "offers": {
+      "price": 49900,
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition",
+      "hasMerchantReturnPolicy": {
+        "applicableCountry": "IN",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+        "description": "Returns are not permitted. We offer a 7 days replacement-only policy.",
+        "@type": "MerchantReturnPolicy"
+      },
+      "@type": "Offer"
+    },
+    "review": [
+      {
+        "name": "Brilliant",
+        "author": {
+          "name": "Mahim Chauhan",
+          "@type": "Person"
+        },
+        "datePublished": "2022-06-23",
+        "reviewBody": "I switch to ios from android after 10 years so this review might help for migrators\n\nIt\u2019s been a month using the iPhone13 and this was my experience\n\n1. Design - its simple and no nonsense design . Expect white and pink rest of the colours are fingerprint magnets.  I have seen all the colours and I highly recommend the pink . It\u2019s so light pink which makes it not girlish. See it for yourself it really looks so premium in light pink colour. \n\nFor rest of it except white the aluminium frame will catch scratches overtime so make your decision accordingly \n\n2. Screen - I know it\u2019s the most hated part for iPhone lineup. It was little bit awkward to adjust in initial days as I came from notchless androids. But trust me after just 10 days you won\u2019t even realise it\u2019s there . Honestly it\u2019s not a big deal . The screen is 1200 nits bright enough for day light and it\u2019s super responsive and crisp. Also it has the best PPI in the market.\n\nI came from 120 hz screen and for me it was a compromise for 60hz but apple has optimised it so well that I stopped missing 120hz after few days .  Still I wish apple would have added to justify the price. \n\n3. Camera - I don\u2019t have to share or comment here for this part . Apple has the best camera in any phone . Period.   It\u2019s super reliable and performs like a charm.  I am still exploring all the options and tricks to use it in its best capabilities. \n\n4. iOS - finally ad and bloatware free UI. Coming from android there is no doubt that ios is so simple , elegant and easy to use .  For me security and UI experience is more important than customisation so I don\u2019t even need to have impractical features like font change or always on screen or app logo themes .  \n\nIts simple , fast and keeps your app in memory even for months . Ram management of iOS is the best in industry \n\n5. Battery - apple has finally fixed one of the major issue with iPhones .    13 line up finally convinced me switch to apple. I am a very heavy user with almost spending 11 hours a day on phone. With my usage it\u2019s easily giving me 7-7.5 hours screen on time . With light to medium usage it\u2019s exceeding even 8.5 hours screen on time which is commendable .\n\nYes , it\u2019s still 20w charger but it will charge 0-80 in 50 min and 30 min charge will given you 50% juice . Don\u2019t fall in the hype of fast charging . Faster the charging time hazardous to its battery life\n\nMy strong suggestion always charge your iPhone13 around 80-90% in your daily usage . Get a 5w charger and charge your phone overnight . Slow charging will keep your battery health in good shape for a long time.\n\n\nI hope my detail review will help users .",
+        "reviewRating": {
+          "ratingValue": 5,
+          "bestRating": 5,
+          "@type": "Rating"
+        },
+        "@type": "Review"
+      },
+      {
+        "name": "Terrific",
+        "author": {
+          "name": "Flipkart Customer",
+          "@type": "Person"
+        },
+        "datePublished": "2021-11-18",
+        "reviewBody": "Happy to have this phone",
+        "reviewRating": {
+          "ratingValue": 5,
+          "bestRating": 5,
+          "@type": "Rating"
+        },
+        "@type": "Review"
+      },
+      {
+        "name": "Perfect product!",
+        "author": {
+          "name": "Arnab Das",
+          "@type": "Person"
+        },
+        "datePublished": "2022-10-23",
+        "reviewBody": "Awesome battery backup amazing camera, a all day batter backup  improved and brilliant IOs 16.1 oled display dolby speakers and lot more, just close your eyes and go for it. One of the best handy smartphones ever and in great discount given by flipkart in big billion days \ud83d\udd25",
+        "reviewRating": {
+          "ratingValue": 5,
+          "bestRating": 5,
+          "@type": "Rating"
+        },
+        "@type": "Review"
+      }
+    ],
+    "@context": "https://schema.org",
+    "@type": "Product"
+  },
+  "#error": false,
+  "#debug": {
+    "requestId": "s9PYzZ9D3pRIiY6",
+    "url": "https://www.flipkart.com/apple-iphone-13-starlight-128-gb/p/itmc9604f122ae7f",
+    "loadedUrl": "https://www.flipkart.com/apple-iphone-13-starlight-128-gb/p/itmc9604f122ae7f",
+    "method": "GET",
+    "retryCount": 0,
+    "errorMessages": [],
+    "statusCode": 200
+  }
+}

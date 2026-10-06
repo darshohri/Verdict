@@ -296,6 +296,34 @@ Product Data:
             }
         except Exception as e:
             return {"response": "Sorry, I am having trouble connecting to the network right now."}
+    elif action == "price-history":
+        url = request.query_params.get("url", "")
+        if not url:
+            return {"error": "URL parameter missing"}
+            
+        is_flipkart = "flipkart.com" in url.lower()
+        is_amazon = "amazon.in" in url.lower() or "amazon.com" in url.lower()
+        
+        if not is_flipkart and not is_amazon:
+            return {"error": "Invalid URL"}
+            
+        # Mock price history generation for UI testing (as planned)
+        import random
+        from datetime import datetime, timedelta
+        
+        history = []
+        base_price = 150.00 if is_amazon else 1500.00
+        
+        # Generate 6 data points representing past 6 months
+        for i in range(6, -1, -1):
+            dt = (datetime.now() - timedelta(days=30*i)).strftime("%b %Y")
+            price = round(base_price * (1 + random.uniform(-0.2, 0.2)), 2)
+            history.append({
+                "date": dt,
+                "price": price
+            })
+            
+        return {"history": history}
     else:
         raise HTTPException(status_code=404, detail="Action not found")
 

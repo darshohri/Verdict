@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle
 import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
+import PriceChart from './PriceChart';
 import Lenis from 'lenis';
 
 let audioCtx: AudioContext | null = null;
@@ -517,6 +518,8 @@ export default function Home() {
                   {result.executive_summary}
                 </h2>
               </motion.div>
+
+              <PriceChart url={url} />
 
               {/* Grid Layout for details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16">
