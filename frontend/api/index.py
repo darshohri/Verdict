@@ -166,9 +166,13 @@ async def vercel_handler(request: Request):
                             "reviewsCount": data.get("aggregateRating", {}).get("reviewCount", 0),
                             "reviews": reviews_list[:15]
                         }
+                        
+                        if product_name == "Unknown Product" and price == "Unknown":
+                            return {"error": "Flipkart's anti-bot system blocked our scraper. We're unable to fetch this product right now. Please try an Amazon link instead!"}
+                            
                         llm_context = json.dumps(llm_context_dict)[:6000]
                     else:
-                        return {"error": "Could not extract data from Flipkart URL"}
+                        return {"error": "Could not extract data from Flipkart URL. The page might be protected by anti-bot measures."}
                 except Exception as e:
                     return {"error": f"Scraper error: {str(e)}"}
                     
