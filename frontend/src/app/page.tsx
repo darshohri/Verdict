@@ -251,35 +251,47 @@ export default function Home() {
     switch (v) {
       case 'BUY':
         return {
-          glow: 'shadow-[0_8px_32px_rgba(16,185,129,0.18)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.28)] border-emerald-500/30',
-          textColor: 'text-emerald-600',
-          iconColor: 'text-emerald-600',
-          iconBg: 'bg-emerald-500/15 border-emerald-500/30',
+          outerShadow: 'shadow-[0_8px_32px_rgba(16,185,129,0.12)] border-emerald-500/20',
+          innerPillBg: 'bg-gradient-to-r from-emerald-500 to-emerald-400',
+          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(16,185,129,0.4)]',
+          iconColor: 'text-white',
+          statusText: 'text-white',
+          labelColor: 'text-emerald-50',
+          confidenceDot: 'bg-emerald-500',
           Icon: CheckCircle2,
         };
       case 'WAIT':
         return {
-          glow: 'shadow-[0_8px_32px_rgba(245,158,11,0.18)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.28)] border-amber-500/30',
-          textColor: 'text-amber-600',
-          iconColor: 'text-amber-600',
-          iconBg: 'bg-amber-500/15 border-amber-500/30',
+          outerShadow: 'shadow-[0_8px_32px_rgba(245,158,11,0.12)] border-amber-500/20',
+          innerPillBg: 'bg-gradient-to-r from-amber-500 to-amber-400',
+          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(245,158,11,0.4)]',
+          iconColor: 'text-white',
+          statusText: 'text-white',
+          labelColor: 'text-amber-50',
+          confidenceDot: 'bg-amber-500',
           Icon: Clock,
         };
       case 'PASS':
       case 'AVOID':
         return {
-          glow: 'shadow-[0_8px_32px_rgba(244,63,94,0.18)] hover:shadow-[0_12px_40px_rgba(244,63,94,0.28)] border-rose-500/30',
-          textColor: 'text-rose-600',
-          iconColor: 'text-rose-600',
-          iconBg: 'bg-rose-500/15 border-rose-500/30',
+          outerShadow: 'shadow-[0_8px_32px_rgba(244,63,94,0.12)] border-rose-500/20',
+          innerPillBg: 'bg-gradient-to-r from-rose-500 to-rose-400',
+          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(244,63,94,0.4)]',
+          iconColor: 'text-white',
+          statusText: 'text-white',
+          labelColor: 'text-rose-50',
+          confidenceDot: 'bg-rose-500',
           Icon: AlertTriangle,
         };
       default:
         return {
-          glow: 'shadow-[0_8px_32px_rgba(113,113,122,0.18)] hover:shadow-[0_12px_40px_rgba(113,113,122,0.28)] border-zinc-500/30',
-          textColor: 'text-zinc-700',
-          iconColor: 'text-zinc-600',
-          iconBg: 'bg-zinc-500/15 border-zinc-500/30',
+          outerShadow: 'shadow-[0_8px_32px_rgba(113,113,122,0.12)] border-zinc-500/20',
+          innerPillBg: 'bg-gradient-to-r from-zinc-600 to-zinc-500',
+          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(113,113,122,0.4)]',
+          iconColor: 'text-white',
+          statusText: 'text-white',
+          labelColor: 'text-zinc-100',
+          confidenceDot: 'bg-zinc-500',
           Icon: Sparkles,
         };
     }
@@ -529,29 +541,34 @@ export default function Home() {
                         const style = getVerdictGlassStyle(result.verdict);
                         const IconComp = style.Icon;
                         return (
-                          <div className={`relative group inline-flex items-center gap-3.5 px-6 py-3.5 rounded-full bg-white/50 backdrop-blur-2xl backdrop-saturate-150 border ${style.glow} shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.9)] transition-all duration-300 hover:-translate-y-0.5`}>
-                            <div className={`w-8 h-8 rounded-full ${style.iconBg} border flex items-center justify-center shrink-0 shadow-sm`}>
-                              <IconComp className={`w-4 h-4 ${style.iconColor}`} strokeWidth={2.5} />
+                          <div className={`relative flex items-center p-1.5 rounded-full bg-white/70 backdrop-blur-xl ring-1 ring-inset ring-white border ${style.outerShadow} transition-transform duration-300 hover:scale-[1.02]`}>
+                            
+                            {/* The Verdict Section (Vibrant Inner Pill) */}
+                            <div className={`flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 rounded-full ${style.innerPillBg} ${style.innerPillShadow}`}>
+                              <IconComp className={`w-4 h-4 md:w-5 md:h-5 ${style.iconColor}`} strokeWidth={2.5} />
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${style.labelColor}`}>
+                                  VERDICT
+                                </span>
+                                <span className={`text-sm md:text-base font-black tracking-widest ${style.statusText}`}>
+                                  {result.verdict}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2.5">
-                              <span className="text-[11px] font-bold tracking-[0.25em] text-zinc-400 uppercase">
-                                VERDICT
-                              </span>
-                              <span className="w-1 h-3.5 rounded-full bg-zinc-300/70" />
-                              <span className={`text-base md:text-lg font-black tracking-wider ${style.textColor}`}>
-                                {result.verdict}
-                              </span>
-                            </div>
+
+                            {/* The Confidence Section */}
+                            {result.confidence_score !== undefined && (
+                              <div className="flex items-center gap-2 px-4 md:px-5">
+                                <div className={`w-2 h-2 rounded-full ${style.confidenceDot} animate-pulse`} />
+                                <span className="text-[10px] md:text-xs font-bold tracking-[0.1em] text-zinc-600 uppercase">
+                                  {result.confidence_score}% <span className="hidden sm:inline">CONFIDENCE</span>
+                                </span>
+                              </div>
+                            )}
+                            
                           </div>
                         );
                       })()}
-
-                      {result.confidence_score !== undefined && (
-                        <div className="inline-flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-white/40 backdrop-blur-xl border border-white/80 shadow-[0_4px_20px_0_rgba(0,0,0,0.03),_inset_0_1px_1px_0_rgba(255,255,255,0.9)] text-xs font-bold tracking-wider text-zinc-600">
-                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span>{result.confidence_score}% CONFIDENCE</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
