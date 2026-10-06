@@ -28,7 +28,7 @@ class ChatRequest(BaseModel):
     message: str
     context: str = ""
 
-@app.post("/api/index")
+@app.api_route("/api/index", methods=["GET", "POST"])
 async def vercel_handler(request: Request):
     action = request.query_params.get("action")
     if action == "evaluate":

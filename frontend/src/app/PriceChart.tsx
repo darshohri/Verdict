@@ -49,8 +49,17 @@ export default function PriceChart({ url }: PriceChartProps) {
     );
   }
 
-  if (error || data.length === 0) {
-    return null; // Gracefully hide if no data or error
+  if (error) {
+    return (
+      <div className="w-full p-4 mb-8 bg-red-50 text-red-600 rounded-2xl border border-red-200">
+        <p className="font-bold">Price Chart Error:</p>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return null; 
   }
 
   const minPrice = Math.min(...data.map(d => d.price));
