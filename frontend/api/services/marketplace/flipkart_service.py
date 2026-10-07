@@ -79,7 +79,7 @@ class FlipkartService:
                         
                         items.push({ 
                             title: title, 
-                            url: cleanUrl,
+                            url: url,
                             priceText: priceText,
                             originalPriceText: origPrice,
                             ratingText: ratingText,
@@ -89,7 +89,6 @@ class FlipkartService:
                         });
                     });
                     
-                    await context.pushData(items);
                     return items;
                 }
             """,
@@ -134,8 +133,9 @@ class FlipkartService:
                     except:
                         pass
                         
+                    product_id = item.get('url', '').split('/p/')[-1].split('?')[0][:15] if '/p/' in item.get('url', '') else str(hash(item.get('url', '')))[:10]
                     products.append(ShoppingProduct(
-                        id=f"flp_{item.get('url', '').split('/p/')[0].split('/')[-1][:10]}",
+                        id=f"flp_{product_id}",
                         title=title,
                         store="flipkart",
                         url=item.get("url", ""),
