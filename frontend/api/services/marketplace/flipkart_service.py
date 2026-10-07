@@ -19,54 +19,64 @@ class FlipkartService:
                     const { $, request, log } = context;
                     const items = [];
                     
-                    // Try targeting common search result container classes
-                    const productContainers = $('div[data-id]');
+                    const productLinks = $('a[href*="/p/itm"]');
+                    const seen = new Set();
                     
-                    productContainers.each((i, el) => {
-                        if (i >= 5) return; // Limit to max_items internally
+                    productLinks.each((i, el) => {
+                        if (items.length >= 10) return;
+                        const url = $(el).attr('href');
+                        const cleanUrl = url.split('?')[0];
+                        if (seen.has(cleanUrl)) return;
+                        seen.add(cleanUrl);
                         
-                        const element = $(el);
-                        
-                        // Extract Title
-                        const title = element.find('div.KzDlHZ, a.wjcEIp, a.IRpwTa, div._4rR01T, a.s1Q9rs').first().text().trim();
-                        if (!title) return; // Skip if no title
-                        
-                        // Extract URL
-                        let url = element.find('a.CGtC98, a.VJA3rP, a').first().attr('href');
-                        if (url && !url.startsWith('http')) {
-                            url = 'https://www.flipkart.com' + url.split('?')[0]; // Clean URL tracking params
+                        let title = $(el).find('img').attr('alt');
+                        if (!title) {
+                            title = $(el).text().replace('Add to Compare', '').trim();
+                        }
+                        if (!title || title.length < 5) {
+                            const parts = cleanUrl.split('/')[1];
+                            if (parts) title = parts.replace(/-/g, ' ');
                         }
                         
-                        // Extract Price
-                        const priceText = element.find('div.Nx9bqj, div._30jeq3').first().text().trim();
-                        const originalPriceText = element.find('div.yRaY8j, div._3I9_wc').first().text().trim();
+                        let container = $(el).closest('div[data-id]');
+                        if (!container.length) container = $(el).parent().parent().parent();
                         
-                        // Extract Image
-                        const image = element.find('img.DByuf4, img._396cs4, img').first().attr('src');
+                        const text = container.text();
                         
-                        // Extract Rating & Reviews
-                        const ratingText = element.find('div.XQDdHH, div._3LWZlK').first().text().trim();
-                        const reviewsText = element.find('span.Wphh3N, span._2_R_DZ').first().text().trim();
+                        let priceText = "";
+                        const priceMatch = text.match(/₹([\\d,]+)/);
+                        if (priceMatch) priceText = priceMatch[1];
                         
-                        // Extract Features (usually bullet points in list view)
-                        const features = [];
-                        element.find('ul.G4BRas li, ul.vFw0gD li, li.rgWa7D').each((j, li) => {
-                            features.push($(li).text().trim());
-                        });
+                        let ratingText = "";
+                        const ratingMatch = text.match(/(\\d\\.\\d)★/);
+                        if (ratingMatch) ratingText = ratingMatch[1];
                         
-                        items.push({
-                            title,
-                            url: url || search_url,
-                            priceText,
-                            originalPriceText,
-                            image,
-                            ratingText,
-                            reviewsText,
-                            features
+                        let origPrice = "";
+                        const allPrices = [...text.matchAll(/₹([\\d,]+)/g)];
+                        if (allPrices.length > 1) {
+                            origPrice = allPrices[1][1];
+                        }
+                        
+                        // Try to find image
+                        const image = $(el).find('img').attr('src') || '';
+                        
+                        // We do not have easy access to reviews and features via this generic traversal, 
+                        // but this ensures we don't break when DOM classes change.
+                        
+                        items.push({ 
+                            title: title, 
+                            url: 'https://www.flipkart.com' + cleanUrl,
+                            priceText: priceText,
+                            originalPriceText: origPrice,
+                            ratingText: ratingText,
+                            image: image,
+                            reviewsText: "",
+                            features: []
                         });
                     });
                     
-                    return { items };
+                    await context.pushData(items);
+                    return items;
                 }
             """,
             "proxyConfiguration": { "useApifyProxy": True }
@@ -78,8 +88,8 @@ class FlipkartService:
             items_data = list(apify_client.dataset(dataset_id).iterate_items())
             
             products = []
-            if items_data and len(items_data) > 0 and 'items' in items_data[0]:
-                raw_items = items_data[0]['items']
+            if items_data and len(items_data) > 0:
+                raw_items = items_data
                 
                 for item in raw_items:
                     title = item.get("title", "")

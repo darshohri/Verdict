@@ -18,16 +18,18 @@ run_input = {
             const { $, request, log } = context;
             const items = [];
             
-            // Log the entire body for debugging
-            const html = $('body').html();
-            log.info("Body length: " + html.length);
+            const productContainers = $('div[data-id]');
             
-            // Find products using a very generic selector
-            const links = $('a[href*="/p/itm"]').slice(0, 5);
-            links.each((i, el) => {
+            productContainers.each((i, el) => {
+                if (i >= 5) return;
+                
                 const element = $(el);
-                const title = element.text() || "No title";
-                items.push({ title: title, url: element.attr('href') });
+                
+                // Extract Title
+                const title = element.find('div.KzDlHZ, a.wjcEIp, a.IRpwTa, div._4rR01T, a.s1Q9rs').first().text().trim();
+                if (!title) return; // Skip if no title
+                
+                items.push({ title });
             });
             
             await context.pushData(items);
@@ -40,4 +42,4 @@ run_input = {
 run = apify_client.actor("apify/cheerio-scraper").call(run_input=run_input)
 dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
 items_data = list(apify_client.dataset(dataset_id).iterate_items())
-print("Raw Items Data:", items_data)
+print("Total items found:", len(items_data))

@@ -8,8 +8,10 @@ class AmazonService:
         if not apify_client:
             return []
             
+        import urllib.parse
+        search_url = f"https://www.amazon.in/s?k={urllib.parse.quote_plus(query)}"
         run_input = {
-            "keyword": query,
+            "categoryUrls": [{"url": search_url}],
             "maxItemsPerStartUrl": max_items,
             "maxSearchPagesPerStartUrl": 1,
             "maxProductVariantsAsSeparateResults": 0,
