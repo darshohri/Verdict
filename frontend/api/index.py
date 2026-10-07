@@ -24,15 +24,10 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 from apify_client import ApifyClient
 from groq import Groq
-import google.generativeai as genai
 
 # Initialize clients if keys exist
 apify_client = ApifyClient(APIFY_TOKEN) if APIFY_TOKEN else None
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 app = FastAPI()
 
@@ -176,7 +171,7 @@ Product Data:
 """
 
             completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="openai/gpt-oss-120b",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"},
             )

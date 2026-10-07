@@ -24,7 +24,7 @@ User Query: "{query}"
 """
         try:
             completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile", # Using this as the most intelligent Groq model available
+                model="openai/gpt-oss-120b",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )
