@@ -6,6 +6,7 @@ import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransf
 import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
 import PriceChart from './PriceChart';
+import ShoppingResults from './ShoppingResults';
 import Lenis from 'lenis';
 
 let audioCtx: AudioContext | null = null;
@@ -76,6 +77,7 @@ export default function Home() {
     return () => lenis.destroy();
   }, []);
   const [result, setResult] = useState<any | null>(null);
+  const [searchResults, setSearchResults] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState('');
   const [isChatting, setIsChatting] = useState(false);
@@ -165,30 +167,36 @@ export default function Home() {
     if (!url.trim()) return;
 
     const trimmedUrl = url.trim().toLowerCase();
-    const cleanedUrl = trimmedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+    const isUrl = trimmedUrl.startsWith('http') || trimmedUrl.startsWith('www.') || trimmedUrl.includes('.com') || trimmedUrl.includes('.in');
     
-    // Only reject bare homepages — let the backend handle deeper validation
-    if (cleanedUrl === 'amazon.com' || cleanedUrl === 'amazon.in' || cleanedUrl === 'flipkart.com') {
-      setError("Please paste a link to a specific product (e.g. amazon.com/dp/B08X...), not the store's homepage.");
-      return;
-    }
-    
-    const isSupported = cleanedUrl.startsWith('amazon.com/') || cleanedUrl.startsWith('amazon.in/') || cleanedUrl.startsWith('flipkart.com/');
-    if (!isSupported) {
-      setError("Hold up! Verdict currently only supports Amazon and Flipkart product links. Please drop a valid link from either of those stores.");
-      return;
+    // Check if it's an evaluation of a single URL or a natural language search
+    let action = 'evaluate';
+    if (!isUrl) {
+      action = 'search';
+    } else {
+      const cleanedUrl = trimmedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+      if (cleanedUrl === 'amazon.com' || cleanedUrl === 'amazon.in' || cleanedUrl === 'flipkart.com') {
+        setError("Please paste a link to a specific product (e.g. amazon.com/dp/B08X...), not the store's homepage.");
+        return;
+      }
+      
+      const isSupported = cleanedUrl.startsWith('amazon.com/') || cleanedUrl.startsWith('amazon.in/') || cleanedUrl.startsWith('flipkart.com/');
+      if (!isSupported) {
+        setError("Hold up! Verdict currently only supports Amazon and Flipkart product links. Please drop a valid link from either of those stores.");
+        return;
+      }
     }
     
     setIsAnalyzing(true);
     setError(null);
     setResult(null);
+    setSearchResults(null);
     
     const startTime = Date.now();
-    const isAmazon = url.toLowerCase().includes('amazon');
-    const minLoadingTime = isAmazon ? 8000 : 16000;
+    const minLoadingTime = isUrl ? (trimmedUrl.includes('amazon') ? 8000 : 16000) : 12000;
 
     try {
-      const response = await fetch('/api/index?action=evaluate', {
+      const response = await fetch(`/api/index?action=${action}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,7 +218,11 @@ export default function Home() {
         await new Promise(r => setTimeout(r, minLoadingTime - elapsedTime));
       }
 
-      setResult(data);
+      if (action === 'search') {
+        setSearchResults(data);
+      } else {
+        setResult(data);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -297,7 +309,7 @@ export default function Home() {
     }
   };
 
-  const isExpanded = isAnalyzing || result || error;
+  const isExpanded = isAnalyzing || result || error || searchResults;
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -318,6 +330,7 @@ export default function Home() {
     setUrl('');
     setIsAnalyzing(false);
     setResult(null);
+    setSearchResults(null);
     setError(null);
     setChatHistory([]);
     setIsChatOpen(false);
@@ -446,7 +459,7 @@ export default function Home() {
           <div className="pl-3 md:pl-4 text-zinc-400 shrink-0"><Search size={22} className="w-5 h-5 md:w-6 md:h-6" /></div>
           <input 
             type="text" 
-            placeholder="Paste Amazon or Flipkart URL..." 
+            placeholder="Paste Amazon/Flipkart URL or search for a product..." 
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
@@ -469,7 +482,7 @@ export default function Home() {
       {/* Dynamic Results Dashboard */}
       <div ref={resultsRef} className={`relative w-full transition-all duration-1000 ease-in-out flex-1 flex flex-col ${isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 pointer-events-none h-0 overflow-hidden'}`}>
         {/* Scroll-driven decorative curve — full width behind everything */}
-        {result && !isAnalyzing && !error && <ScrollCurve containerRef={resultsRef} />}
+        {(result || searchResults) && !isAnalyzing && !error && <ScrollCurve containerRef={resultsRef} />}
 
         <div className="w-full max-w-5xl mx-auto px-6 relative z-10">
         
@@ -696,6 +709,11 @@ export default function Home() {
                  </div>
               </motion.div>
             </motion.div>
+          )}
+
+          {/* Search Results State */}
+          {searchResults && !isAnalyzing && !error && (
+            <ShoppingResults data={searchResults} />
           )}
         </AnimatePresence>
         </div>{/* close inner max-w wrapper */}

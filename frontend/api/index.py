@@ -199,6 +199,61 @@ Product Data:
             print(f"Error during evaluation: {e}")
             return {"error": f"Evaluation failed: {str(e)}"}
 
+    # ── SEARCH / SHOPPING INTELLIGENCE ────────────────────────────────
+    elif action == "search":
+        try:
+            from services.intent_service import IntentService
+            from services.marketplace.amazon_service import AmazonService
+            from services.marketplace.flipkart_service import FlipkartService
+            from services.matching_service import MatchingService
+            from services.ranking_service import RankingService
+        except ImportError:
+            return {"error": "Internal modules not found."}
+
+        body = await request.json()
+        query = body.get("search_query", "").strip()
+
+        if not apify_client or not groq_client:
+            return {"error": "API keys not configured in Vercel"}
+
+        try:
+            # 1. Intent Extraction
+            intent = IntentService.parse_intent(query)
+            search_term = intent.search_query if intent.search_query else query
+            
+            # 2. Marketplace Search
+            amazon_products = AmazonService.search(search_term, max_items=5)
+            flipkart_products = FlipkartService.search(search_term, max_items=5)
+            
+            all_products = amazon_products + flipkart_products
+            
+            # 3. Matching and Normalization
+            grouped_products = MatchingService.match_and_normalize(all_products)
+            
+            # 4. Ranking and Categorization
+            ranked_groups = RankingService.rank_products(grouped_products, intent)
+            
+            # 5. Build Response
+            return {
+                "query": query,
+                "intent": intent.dict(),
+                "marketplaces": {
+                    "amazon": {
+                        "status": "success" if len(amazon_products) > 0 else "failed",
+                        "resultCount": len(amazon_products)
+                    },
+                    "flipkart": {
+                        "status": "success" if len(flipkart_products) > 0 else "failed",
+                        "resultCount": len(flipkart_products)
+                    }
+                },
+                "results": [g.dict() for g in ranked_groups],
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            print(f"Error during search: {e}")
+            return {"error": f"Search failed: {str(e)}"}
+
     # ── CHAT ──────────────────────────────────────────────────────────
     elif action == "chat":
         body = await request.json()

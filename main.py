@@ -25,6 +25,8 @@ groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 app = FastAPI()
 
+from api.routes import shopping
+app.include_router(shopping.router, prefix="/api/v1/verdict/shopping", tags=["Shopping"])
 
 class EvaluateRequest(BaseModel):
     search_query: str
