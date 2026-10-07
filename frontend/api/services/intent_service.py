@@ -10,6 +10,7 @@ class IntentService:
             
         prompt = f"""
 You are a shopping intent extractor. Given the following user query, extract the shopping intent.
+If the query is too broad or generic (like "best phones", "show me best phone to buy"), set `is_generic` to true and provide a friendly `clarification_message` asking the user for more details (budget, specs, use-case).
 Return strictly a JSON object with the following schema:
 {{
   "category": "string or null",
@@ -17,7 +18,9 @@ Return strictly a JSON object with the following schema:
   "series": "string or null",
   "search_query": "string (the best optimized generic search phrase for Amazon/Flipkart)",
   "budget": float or null,
-  "preferences": {{"price_priority": "high/medium/low", "trust_priority": "high/medium/low"}}
+  "preferences": {{"price_priority": "high/medium/low", "trust_priority": "high/medium/low"}},
+  "is_generic": boolean,
+  "clarification_message": "string or null"
 }}
 
 User Query: "{query}"

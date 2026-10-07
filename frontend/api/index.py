@@ -29,7 +29,17 @@ from groq import Groq
 apify_client = ApifyClient(APIFY_TOKEN) if APIFY_TOKEN else None
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class EvaluateRequest(BaseModel):
     search_query: str
@@ -104,7 +114,9 @@ async def vercel_handler(request: Request):
                 if isinstance(run, dict)
                 else getattr(run, "default_dataset_id", getattr(run, "defaultDatasetId", None))
             )
-            items = list(apify_client.dataset(dataset_id).iterate_items())
+            if not dataset_id:
+                return {"error": "Could not extract data from the provided URL."}
+            items = list(apify_client.dataset(str(dataset_id)).iterate_items())
 
             if not items:
                 if is_flipkart_redirect:
@@ -176,6 +188,8 @@ Product Data:
                 response_format={"type": "json_object"},
             )
             llm_response_text = completion.choices[0].message.content
+            if llm_response_text is None:
+                return {"error": "Failed to generate a valid response."}
 
             llm_response = json.loads(llm_response_text)
 
@@ -225,6 +239,9 @@ Product Data:
         try:
             # 1. Intent Extraction
             intent = IntentService.parse_intent(query)
+            if getattr(intent, 'is_generic', False) and getattr(intent, 'clarification_message', None):
+                return {"error": f"INFO:{intent.clarification_message}"}
+                
             search_term = intent.search_query if intent.search_query else query
             
             # 2. Marketplace Search
@@ -310,7 +327,7 @@ Product Data:
 
         parsed_price = 0.0
         if current_price:
-            match = re.search(r"[\d,]+(?:\.\d+)?", str(current_price))
+            match = re.search(r"[\d,]+(?:\.\d+)?", current_price)
             if match:
                 try:
                     parsed_price = float(match.group().replace(",", ""))

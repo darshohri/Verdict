@@ -58,3 +58,5 @@ class IntentResult(BaseModel):
     budget: Optional[float] = None
     currency: str = "INR"
     preferences: Dict[str, str] = {}
+    is_generic: bool = False
+    clarification_message: Optional[str] = None

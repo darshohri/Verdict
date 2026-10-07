@@ -108,7 +108,7 @@ export default function ShoppingResults({ data }: { data: any }) {
                     >
                       <div className="flex items-center gap-2">
                         <img 
-                          src={p.store === 'amazon' ? 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' : 'https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/flipkart-095e08.svg'} 
+                          src={p.store === 'amazon' ? 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' : 'https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/flipkart-plus_8d85f4.png'} 
                           alt={p.store} 
                           className={`h-4 ${p.store === 'amazon' ? 'mt-1' : ''}`}
                         />

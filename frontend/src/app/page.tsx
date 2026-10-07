@@ -196,7 +196,7 @@ export default function Home() {
     const minLoadingTime = isUrl ? (trimmedUrl.includes('amazon') ? 8000 : 16000) : 12000;
 
     try {
-      const response = await fetch(`/api/index?action=${action}`, {
+      const response = await fetch(`http://localhost:8000/api/index?action=${action}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ export default function Home() {
     setIsChatting(true);
     
     try {
-      const response = await fetch('/api/index?action=chat', {
+      const response = await fetch('http://localhost:8000/api/index?action=chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -492,12 +492,12 @@ export default function Home() {
             <motion.div 
               key="error"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="w-full bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700 flex items-start gap-4 mb-8"
+              className={`w-full ${error.startsWith('INFO:') ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-red-50 border-red-200 text-red-700'} rounded-2xl p-6 flex items-start gap-4 mb-8`}
             >
               <AlertCircle className="shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold mb-1">Analysis Failed</h3>
-                <p className="text-sm opacity-80">{error}</p>
+                <h3 className="font-bold mb-1">{error.startsWith('INFO:') ? 'More Details Needed' : 'Analysis Failed'}</h3>
+                <p className="text-sm opacity-80">{error.startsWith('INFO:') ? error.replace('INFO:', '') : error}</p>
               </div>
             </motion.div>
           )}

@@ -77,12 +77,21 @@ Products:
                 ratings = [p.rating for p in grouped_products if p.rating]
                 aggregate_rating = round(sum(ratings) / len(ratings), 1) if ratings else None
                 
+                # Deduplicate by store (only show one link per store)
+                unique_store_products = []
+                seen_stores = set()
+                # Sort so the cheapest product from each store is prioritized
+                for p in sorted(grouped_products, key=lambda x: x.price if x.price is not None else float('inf')):
+                    if p.store not in seen_stores:
+                        unique_store_products.append(p)
+                        seen_stores.add(p.store)
+                
                 groups.append(NormalizedProductGroup(
                     id=str(uuid.uuid4()),
                     title=g.get("title", grouped_products[0].title),
                     image=images[0] if images else None,
                     features=grouped_products[0].features, # Just grab features from the first one
-                    products=grouped_products,
+                    products=unique_store_products,
                     best_price=best_price,
                     aggregate_rating=aggregate_rating,
                     total_reviews=total_reviews
