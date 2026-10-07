@@ -48,6 +48,13 @@ class AmazonService:
                         price = float(price_val)
                     except:
                         pass
+                        
+                if price and price > 10000000: # 1 Crore+ is likely a concatenated bug like 108500108843
+                    s = str(int(price))
+                    try:
+                        price = float(s[:len(s)//2])
+                    except:
+                        pass
                 
                 original_price_val = item.get("originalPrice") or item.get("getPriceBeforeDiscount")
                 original_price = None
@@ -57,6 +64,13 @@ class AmazonService:
                 elif original_price_val is not None:
                     try:
                         original_price = float(original_price_val)
+                    except:
+                        pass
+                        
+                if original_price and original_price > 10000000:
+                    s = str(int(original_price))
+                    try:
+                        original_price = float(s[:len(s)//2])
                     except:
                         pass
                 

@@ -114,10 +114,20 @@ class FlipkartService:
                         try: price = float(price_text)
                         except: pass
                         
+                    if price and price > 10000000:
+                        s = str(int(price))
+                        try: price = float(s[:len(s)//2])
+                        except: pass
+                        
                     orig_text = item.get("originalPriceText", "").replace(",", "").replace("₹", "").strip()
                     original_price = float(orig_text) if orig_text.isdigit() else None
                     if not original_price and orig_text:
                         try: original_price = float(orig_text)
+                        except: pass
+                        
+                    if original_price and original_price > 10000000:
+                        s = str(int(original_price))
+                        try: original_price = float(s[:len(s)//2])
                         except: pass
                         
                     rating_text = item.get("ratingText", "")
