@@ -175,26 +175,12 @@ Product Data:
 {llm_context}
 """
 
-            if GEMINI_API_KEY:
-                try:
-                    model = genai.GenerativeModel("gemini-1.5-pro", generation_config={"response_mime_type": "application/json"})
-                    response = model.generate_content(prompt)
-                    llm_response_text = response.text
-                except Exception as e:
-                    print(f"Gemini evaluation failed, falling back to Groq: {e}")
-                    completion = groq_client.chat.completions.create(
-                        model="mixtral-8x7b-32768",
-                        messages=[{"role": "user", "content": prompt}],
-                        response_format={"type": "json_object"},
-                    )
-                    llm_response_text = completion.choices[0].message.content
-            else:
-                completion = groq_client.chat.completions.create(
-                    model="mixtral-8x7b-32768",
-                    messages=[{"role": "user", "content": prompt}],
-                    response_format={"type": "json_object"},
-                )
-                llm_response_text = completion.choices[0].message.content
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+            )
+            llm_response_text = completion.choices[0].message.content
 
             llm_response = json.loads(llm_response_text)
 

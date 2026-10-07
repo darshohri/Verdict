@@ -23,25 +23,12 @@ Return strictly a JSON object with the following schema:
 User Query: "{query}"
 """
         try:
-            from core.config import GEMINI_API_KEY
-            import google.generativeai as genai
-            
-            data_text = None
-            if GEMINI_API_KEY:
-                try:
-                    model = genai.GenerativeModel("gemini-1.5-pro", generation_config={"response_mime_type": "application/json"})
-                    response = model.generate_content(prompt)
-                    data_text = response.text
-                except Exception as e:
-                    print(f"Gemini intent failed, falling back to Groq: {e}")
-                    
-            if not data_text:
-                completion = groq_client.chat.completions.create(
-                    model="gemma2-9b-it",
-                    messages=[{"role": "user", "content": prompt}],
-                    response_format={"type": "json_object"}
-                )
-                data_text = completion.choices[0].message.content
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile", # Using this as the most intelligent Groq model available
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            data_text = completion.choices[0].message.content
                 
             content = data_text
             data = json.loads(content)

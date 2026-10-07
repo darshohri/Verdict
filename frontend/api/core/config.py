@@ -2,8 +2,6 @@ import os
 from dotenv import load_dotenv
 from apify_client import ApifyClient
 from groq import Groq
-import google.generativeai as genai
-
 load_dotenv()
 
 APIFY_TOKEN = os.getenv("APIFY_API_TOKEN")
@@ -12,9 +10,3 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 apify_client = ApifyClient(APIFY_TOKEN) if APIFY_TOKEN else None
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
-
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-else:
-    print("Warning: GEMINI_API_KEY is not set.")
-
