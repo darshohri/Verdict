@@ -107,11 +107,17 @@ export default function ShoppingResults({ data }: { data: any }) {
                       className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200 hover:border-[#FF4D15] hover:bg-[#FF4D15]/5 transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <img 
-                          src={p.store === 'amazon' ? 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' : 'https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/flipkart-plus_8d85f4.png'} 
-                          alt={p.store} 
-                          className={`h-4 ${p.store === 'amazon' ? 'mt-1' : ''}`}
-                        />
+                        {p.store === 'amazon' ? (
+                          <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" 
+                            alt={p.store} 
+                            className="h-4 mt-1"
+                          />
+                        ) : (
+                          <div className="flex items-center">
+                            <span className="text-[#2874F0] font-black italic tracking-tighter text-lg leading-none">Flipkart</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-zinc-900">₹{p.price?.toLocaleString('en-IN')}</span>
