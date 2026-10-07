@@ -1,30 +1,17 @@
-import os
-from apify_client import ApifyClient
-from dotenv import load_dotenv
+import urllib.request
+import ssl
 
-load_dotenv()
-client = ApifyClient(os.getenv("APIFY_API_TOKEN"))
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
-run_input = {
-    "categoryUrls": [{ "url": "https://www.amazon.in/RUGMORA-Hand-Tufted-Wool-Rug/dp/B0GRMZVP5X" }],
-    "maxItemsPerStartUrl": 1,
-    "maxSearchPagesPerStartUrl": 1,
-    "maxProductVariantsAsSeparateResults": 0,
-    "useCaptchaSolver": False,
-    "scrapeProductVariantPrices": False,
-    "scrapeProductDetails": True,
-}
+url = "https://rukminim2.flixcart.com/image/612/612/xif0q/track-pant/i/i/y/xl-2-stripes-layzee-resized-original-imahhb9cbrwra3cr.jpeg?q=70"
+req1 = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+req2 = urllib.request.Request(url, headers={'Referer': 'https://www.flipkart.com', 'User-Agent': 'Mozilla/5.0'})
 
-print("Running actor...")
-run = client.actor("junglee/free-amazon-product-scraper").call(run_input=run_input)
-items = list(client.dataset(run.default_dataset_id).iterate_items())
-
-if items:
-    data = items[0]
-    keys = list(data.keys())
-    print("KEYS:", keys)
-    for k in keys:
-        if "img" in k.lower() or "image" in k.lower() or "pic" in k.lower() or "thumb" in k.lower():
-            print(f"FOUND IMAGE KEY '{k}':", data[k])
-else:
-    print("No items.")
+for i, r in enumerate([req1, req2]):
+    try:
+        with urllib.request.urlopen(r, context=ctx) as response:
+            print(f"Req {i}: {response.status}")
+    except Exception as e:
+        print(f"Req {i}: {e}")

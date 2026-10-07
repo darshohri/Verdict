@@ -40,7 +40,7 @@ export default function ShoppingResults({ data }: { data: any }) {
                 {/* Image */}
                 <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 bg-zinc-50 rounded-2xl p-4 flex items-center justify-center">
                   {group.image ? (
-                    <img src={group.image} alt={group.title} className="max-w-full max-h-full object-contain mix-blend-multiply" />
+                    <img src={`https://wsrv.nl/?url=${encodeURIComponent(group.image)}`} alt={group.title} className="max-w-full max-h-full object-contain mix-blend-multiply" />
                   ) : (
                     <div className="w-full h-full bg-zinc-200 rounded-xl animate-pulse" />
                   )}
