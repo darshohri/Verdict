@@ -171,7 +171,7 @@ Product Data:
 """
 
             completion = groq_client.chat.completions.create(
-                model="openai/gpt-oss-120b",
+                model="mixtral-8x7b-32768",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"},
             )

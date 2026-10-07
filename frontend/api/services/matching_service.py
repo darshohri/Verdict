@@ -50,7 +50,7 @@ Products:
         
         try:
             completion = groq_client.chat.completions.create(
-                model="openai/gpt-oss-20b",
+                model="gemma2-9b-it",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )

@@ -29,6 +29,8 @@ class AmazonService:
             for item in items:
                 title = item.get("title", "")
                 url = item.get("url", "")
+                if url.startswith("/"):
+                    url = "https://www.amazon.in" + url
                 
                 # Parse price
                 price_val = item.get("price")
