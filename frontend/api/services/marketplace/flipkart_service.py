@@ -60,14 +60,17 @@ class FlipkartService:
                             origPrice = allPrices[1][1];
                         }
                         
-                        // Try to find image
                         let image = '';
                         const imgs = $(el).find('img');
                         imgs.each((j, imgEl) => {
-                            const src = $(imgEl).attr('src') || '';
-                            // ignore lazy loading placeholders
-                            if (src && !src.includes('data:image/') && !src.includes('placeholder')) {
-                                image = src;
+                            let src = $(imgEl).attr('src') || '';
+                            if (src && !src.includes('data:image/') && !src.includes('placeholder') && !src.includes('fa_9e47c1') && !src.includes('assured')) {
+                                if (src.startsWith('//')) {
+                                    src = 'https:' + src;
+                                }
+                                if (!image || src.includes('rukminim')) {
+                                    image = src;
+                                }
                             }
                         });
                         
