@@ -253,7 +253,7 @@ Product Data:
             all_products = amazon_products + flipkart_products
             
             # 3. Matching and Normalization
-            grouped_products = MatchingService.match_and_normalize(all_products)
+            grouped_products = MatchingService.match_and_normalize(all_products, query)
             
             # 4. Ranking and Categorization
             ranked_groups = RankingService.rank_products(grouped_products, intent)

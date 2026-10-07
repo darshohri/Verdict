@@ -6,7 +6,7 @@ from models.product import ShoppingProduct, NormalizedProductGroup
 
 class MatchingService:
     @staticmethod
-    def match_and_normalize(products: List[ShoppingProduct]) -> List[NormalizedProductGroup]:
+    def match_and_normalize(products: List[ShoppingProduct], query: str = "") -> List[NormalizedProductGroup]:
         if not products:
             return []
             
@@ -35,12 +35,16 @@ class MatchingService:
             
         prompt = f"""
 You are a product matching expert. I will provide a list of products scraped from Amazon and Flipkart.
-Your task is to group identical products together. 
+Your task is to group identical products together and FILTER OUT any products that violate the user's constraints.
+
+USER'S ORIGINAL QUERY: "{query}"
+
 CRITICAL RULES:
-1. Do NOT merge products if they are different variants (e.g. 128GB vs 256GB, RTX 4050 vs RTX 4060). Variant accuracy is critical.
-2. Different stores will have slightly different titles for the exact same variant. You must match them.
-3. Return strictly a JSON object with a single key "groups" containing a list of grouped objects.
-4. Each group must contain:
+1. STRICT FILTERING: If the user's query contains a constraint (e.g. "under 60k", "less than 500", "only ASUS"), you MUST completely exclude any product that violates this constraint from your final output. Check the `price` of each product against budget constraints. (Note: 60k means 60,000).
+2. Do NOT merge products if they are different variants (e.g. 128GB vs 256GB, RTX 4050 vs RTX 4060). Variant accuracy is critical.
+3. Different stores will have slightly different titles for the exact same variant. You must match them.
+4. Return strictly a JSON object with a single key "groups" containing a list of grouped objects.
+5. Each group must contain:
    - "title": A clean, normalized title for the product (e.g. "ASUS ROG Strix G16 (RTX 4060, 16GB, 1TB)")
    - "product_ids": A list of the string IDs of the products that belong to this group.
 
