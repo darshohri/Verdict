@@ -262,50 +262,14 @@ export default function Home() {
     const v = verdict?.toUpperCase();
     switch (v) {
       case 'BUY':
-        return {
-          outerShadow: 'shadow-[0_8px_32px_rgba(16,185,129,0.12)] border-emerald-500/20',
-          innerPillBg: 'bg-gradient-to-r from-emerald-500 to-emerald-400',
-          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(16,185,129,0.4)]',
-          iconColor: 'text-white',
-          statusText: 'text-white',
-          labelColor: 'text-emerald-50',
-          confidenceDot: 'bg-emerald-500',
-          Icon: CheckCircle2,
-        };
+        return { badgeBg: 'bg-[#10B981]', badgeText: 'text-white', dotColor: 'bg-emerald-500', Icon: CheckCircle2 };
       case 'WAIT':
-        return {
-          outerShadow: 'shadow-[0_8px_32px_rgba(245,158,11,0.12)] border-amber-500/20',
-          innerPillBg: 'bg-gradient-to-r from-amber-500 to-amber-400',
-          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(245,158,11,0.4)]',
-          iconColor: 'text-white',
-          statusText: 'text-white',
-          labelColor: 'text-amber-50',
-          confidenceDot: 'bg-amber-500',
-          Icon: Clock,
-        };
+        return { badgeBg: 'bg-[#F59E0B]', badgeText: 'text-white', dotColor: 'bg-amber-500', Icon: Clock };
       case 'PASS':
       case 'AVOID':
-        return {
-          outerShadow: 'shadow-[0_8px_32px_rgba(244,63,94,0.12)] border-rose-500/20',
-          innerPillBg: 'bg-gradient-to-r from-rose-500 to-rose-400',
-          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(244,63,94,0.4)]',
-          iconColor: 'text-white',
-          statusText: 'text-white',
-          labelColor: 'text-rose-50',
-          confidenceDot: 'bg-rose-500',
-          Icon: AlertTriangle,
-        };
+        return { badgeBg: 'bg-[#F43F5E]', badgeText: 'text-white', dotColor: 'bg-rose-500', Icon: AlertTriangle };
       default:
-        return {
-          outerShadow: 'shadow-[0_8px_32px_rgba(113,113,122,0.12)] border-zinc-500/20',
-          innerPillBg: 'bg-gradient-to-r from-zinc-600 to-zinc-500',
-          innerPillShadow: 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(113,113,122,0.4)]',
-          iconColor: 'text-white',
-          statusText: 'text-white',
-          labelColor: 'text-zinc-100',
-          confidenceDot: 'bg-zinc-500',
-          Icon: Sparkles,
-        };
+        return { badgeBg: 'bg-zinc-800', badgeText: 'text-white', dotColor: 'bg-zinc-500', Icon: Sparkles };
     }
   };
 
@@ -554,16 +518,16 @@ export default function Home() {
                         const style = getVerdictGlassStyle(result.verdict);
                         const IconComp = style.Icon;
                         return (
-                          <div className={`relative flex items-center p-1.5 rounded-full bg-white/70 backdrop-blur-xl ring-1 ring-inset ring-white border ${style.outerShadow} transition-transform duration-300 hover:scale-[1.02]`}>
+                          <div className="inline-flex items-center gap-4 p-1.5 pr-6 rounded-full bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-sm transition-transform duration-300 hover:scale-[1.02]">
                             
-                            {/* The Verdict Section (Vibrant Inner Pill) */}
-                            <div className={`flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 rounded-full ${style.innerPillBg} ${style.innerPillShadow}`}>
-                              <IconComp className={`w-4 h-4 md:w-5 md:h-5 ${style.iconColor}`} strokeWidth={2.5} />
-                              <div className="flex items-center gap-2">
-                                <span className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${style.labelColor}`}>
+                            {/* The Verdict Section (Premium Solid Pill) */}
+                            <div className={`flex items-center gap-2 px-5 py-2 rounded-full ${style.badgeBg} shadow-sm`}>
+                              <IconComp className={`w-4 h-4 ${style.badgeText}`} strokeWidth={2.5} />
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[9px] font-bold tracking-[0.2em] uppercase opacity-90 ${style.badgeText}`}>
                                   VERDICT
                                 </span>
-                                <span className={`text-sm md:text-base font-black tracking-widest ${style.statusText}`}>
+                                <span className={`text-sm font-black tracking-widest uppercase ${style.badgeText}`}>
                                   {result.verdict}
                                 </span>
                               </div>
@@ -571,10 +535,10 @@ export default function Home() {
 
                             {/* The Confidence Section */}
                             {result.confidence_score !== undefined && (
-                              <div className="flex items-center gap-2 px-4 md:px-5">
-                                <div className={`w-2 h-2 rounded-full ${style.confidenceDot} animate-pulse`} />
-                                <span className="text-[10px] md:text-xs font-bold tracking-[0.1em] text-zinc-600 uppercase">
-                                  {result.confidence_score}% <span className="hidden sm:inline">CONFIDENCE</span>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-1.5 h-1.5 rounded-full ${style.dotColor} animate-pulse`} />
+                                <span className="text-xs font-bold tracking-wide text-zinc-800">
+                                  {result.confidence_score}% <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase ml-1 hidden sm:inline">CONFIDENCE</span>
                                 </span>
                               </div>
                             )}
