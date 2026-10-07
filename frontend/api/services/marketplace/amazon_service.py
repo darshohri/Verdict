@@ -29,8 +29,11 @@ class AmazonService:
             for item in items:
                 title = item.get("title", "")
                 url = item.get("url", "")
-                if url.startswith("/"):
-                    url = "https://www.amazon.in" + url
+                if not url and item.get("asin"):
+                    url = f"https://www.amazon.in/dp/{item.get('asin')}"
+                elif url and not url.startswith("http"):
+                    import urllib.parse
+                    url = urllib.parse.urljoin("https://www.amazon.in", url)
                 
                 # Parse price
                 price_val = item.get("price")
@@ -46,15 +49,22 @@ class AmazonService:
                     except:
                         pass
                 
-                original_price_val = item.get("originalPrice")
+                original_price_val = item.get("originalPrice") or item.get("getPriceBeforeDiscount")
                 original_price = None
                 if isinstance(original_price_val, dict):
                     orig_num = original_price_val.get("value")
                     if orig_num: original_price = float(orig_num)
+                elif original_price_val is not None:
+                    try:
+                        original_price = float(original_price_val)
+                    except:
+                        pass
                 
                 # Image
                 high_res = item.get("highResolutionImages", [])
                 image = high_res[0] if high_res else item.get("thumbnailImage", "")
+                if not image:
+                    image = item.get("imageUrl", "")
                 
                 # Rating
                 rating = item.get("stars", None)

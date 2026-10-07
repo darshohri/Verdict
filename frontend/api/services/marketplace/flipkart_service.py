@@ -24,7 +24,10 @@ class FlipkartService:
                     
                     productLinks.each((i, el) => {
                         if (items.length >= 10) return;
-                        const url = $(el).attr('href');
+                        const href = $(el).attr('href');
+                        if (!href) return;
+                        
+                        const url = href.startsWith('http') ? href : 'https://www.flipkart.com' + href;
                         const cleanUrl = url.split('?')[0];
                         if (seen.has(cleanUrl)) return;
                         seen.add(cleanUrl);
@@ -34,7 +37,7 @@ class FlipkartService:
                             title = $(el).text().replace('Add to Compare', '').trim();
                         }
                         if (!title || title.length < 5) {
-                            const parts = cleanUrl.split('/')[1];
+                            const parts = cleanUrl.split('/')[3] || cleanUrl.split('/')[1];
                             if (parts) title = parts.replace(/-/g, ' ');
                         }
                         
@@ -58,14 +61,22 @@ class FlipkartService:
                         }
                         
                         // Try to find image
-                        const image = $(el).find('img').attr('src') || '';
+                        let image = '';
+                        const imgs = $(el).find('img');
+                        imgs.each((j, imgEl) => {
+                            const src = $(imgEl).attr('src') || '';
+                            // ignore lazy loading placeholders
+                            if (src && !src.includes('data:image/') && !src.includes('placeholder')) {
+                                image = src;
+                            }
+                        });
                         
                         // We do not have easy access to reviews and features via this generic traversal, 
                         // but this ensures we don't break when DOM classes change.
                         
                         items.push({ 
                             title: title, 
-                            url: 'https://www.flipkart.com' + cleanUrl,
+                            url: cleanUrl,
                             priceText: priceText,
                             originalPriceText: origPrice,
                             ratingText: ratingText,
