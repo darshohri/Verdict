@@ -244,7 +244,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: userMsg,
-          context: result ? JSON.stringify(result) : ""
+          context: result ? JSON.stringify(result) : (searchResults ? JSON.stringify(searchResults) : "")
         }),
       });
       if (response.ok) {
@@ -720,7 +720,7 @@ export default function Home() {
       </div>
 
       {/* Floating AI Chat */}
-      {result && !isAnalyzing && !error && (
+      {(result || searchResults) && !isAnalyzing && !error && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
           {/* Chat Window */}
           <motion.div 
@@ -754,7 +754,7 @@ export default function Home() {
               {chatHistory.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                   <MessageSquare size={36} className="mb-4 text-[#FF4D15]" />
-                  <p className="text-sm text-zinc-600 px-4">Ask anything about {result.product_name || "this product"}</p>
+                  <p className="text-sm text-zinc-600 px-4">Ask anything about {result?.product_name || "these products"}</p>
                 </div>
               ) : (
                 chatHistory.map((msg, idx) => (
