@@ -44,7 +44,8 @@ CRITICAL RULES:
 2. Do NOT merge products if they are different variants (e.g. 128GB vs 256GB, RTX 4050 vs RTX 4060). Variant accuracy is critical.
 3. Different stores will have slightly different titles for the exact same variant. You must match them.
 4. Return strictly a JSON object with a single key "groups" containing a list of grouped objects.
-5. Each group must contain:
+5. SORTING & RANKING: You MUST order the groups in the final JSON array based on quality and brand reputation. Premium flagship brands (e.g., Apple/iPhone, Samsung Galaxy, Sony) MUST be placed at the very top. Cheaper or lower-tier brands (like Redmi, iQOO, Boult, etc.) should be pushed to the bottom.
+6. Each group must contain:
    - "title": A clean, normalized title for the product (e.g. "ASUS ROG Strix G16 (RTX 4060, 16GB, 1TB)")
    - "product_ids": A list of the string IDs of the products that belong to this group.
 
