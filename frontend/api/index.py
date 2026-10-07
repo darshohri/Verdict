@@ -4,7 +4,13 @@ import re
 import random
 import hashlib
 import urllib.parse
+import sys
 from datetime import datetime, timedelta
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -207,8 +213,8 @@ Product Data:
             from services.marketplace.flipkart_service import FlipkartService
             from services.matching_service import MatchingService
             from services.ranking_service import RankingService
-        except ImportError:
-            return {"error": "Internal modules not found."}
+        except ImportError as e:
+            return {"error": f"Internal modules not found: {str(e)}"}
 
         body = await request.json()
         query = body.get("search_query", "").strip()
