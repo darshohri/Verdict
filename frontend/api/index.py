@@ -24,10 +24,15 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 from apify_client import ApifyClient
 from groq import Groq
+import google.generativeai as genai
 
 # Initialize clients if keys exist
 apify_client = ApifyClient(APIFY_TOKEN) if APIFY_TOKEN else None
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 app = FastAPI()
 
@@ -170,13 +175,27 @@ Product Data:
 {llm_context}
 """
 
-            completion = groq_client.chat.completions.create(
-                model="mixtral-8x7b-32768",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"},
-            )
+            if GEMINI_API_KEY:
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash", generation_config={"response_mime_type": "application/json"})
+                    response = model.generate_content(prompt)
+                    llm_response_text = response.text
+                except Exception as e:
+                    print(f"Gemini evaluation failed, falling back to Groq: {e}")
+                    completion = groq_client.chat.completions.create(
+                        model="mixtral-8x7b-32768",
+                        messages=[{"role": "user", "content": prompt}],
+                        response_format={"type": "json_object"},
+                    )
+                    llm_response_text = completion.choices[0].message.content
+            else:
+                completion = groq_client.chat.completions.create(
+                    model="mixtral-8x7b-32768",
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"},
+                )
+                llm_response_text = completion.choices[0].message.content
 
-            llm_response_text = completion.choices[0].message.content
             llm_response = json.loads(llm_response_text)
 
             if not llm_response.get("is_valid_product", True):

@@ -49,12 +49,27 @@ Products:
 """
         
         try:
-            completion = groq_client.chat.completions.create(
-                model="gemma2-9b-it",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"}
-            )
-            data = json.loads(completion.choices[0].message.content)
+            from core.config import GEMINI_API_KEY
+            import google.generativeai as genai
+            
+            data_text = None
+            if GEMINI_API_KEY:
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash", generation_config={"response_mime_type": "application/json"})
+                    response = model.generate_content(prompt)
+                    data_text = response.text
+                except Exception as e:
+                    print(f"Gemini matching failed, falling back to Groq: {e}")
+                    
+            if not data_text:
+                completion = groq_client.chat.completions.create(
+                    model="gemma2-9b-it",
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"}
+                )
+                data_text = completion.choices[0].message.content
+                
+            data = json.loads(data_text)
             
             groups = []
             for g in data.get("groups", []):
