@@ -196,7 +196,7 @@ export default function Home() {
     const minLoadingTime = isUrl ? (trimmedUrl.includes('amazon') ? 8000 : 16000) : 12000;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/index?action=${action}`, {
+      const response = await fetch(`/api/index?action=${action}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ export default function Home() {
     setIsChatting(true);
     
     try {
-      const response = await fetch('http://localhost:8000/api/index?action=chat', {
+      const response = await fetch('/api/index?action=chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
