@@ -208,11 +208,11 @@ Product Data:
     # ── SEARCH / SHOPPING INTELLIGENCE ────────────────────────────────
     elif action == "search":
         try:
-            from services.intent_service import IntentService
-            from services.marketplace.amazon_service import AmazonService
-            from services.marketplace.flipkart_service import FlipkartService
-            from services.matching_service import MatchingService
-            from services.ranking_service import RankingService
+            from services.intent_service import IntentService  # type: ignore
+            from services.marketplace.amazon_service import AmazonService  # type: ignore
+            from services.marketplace.flipkart_service import FlipkartService  # type: ignore
+            from services.matching_service import MatchingService  # type: ignore
+            from services.ranking_service import RankingService  # type: ignore
         except ImportError as e:
             return {"error": f"Internal modules not found: {str(e)}"}
 
