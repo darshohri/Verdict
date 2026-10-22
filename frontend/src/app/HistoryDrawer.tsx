@@ -57,26 +57,26 @@ export default function HistoryDrawer({
     switch (verdict?.toUpperCase()) {
       case 'BUY':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle2 size={11} /> BUY
           </span>
         );
       case 'WAIT':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
             <Clock size={11} /> WAIT
           </span>
         );
       case 'AVOID':
       case 'PASS':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
             <AlertTriangle size={11} /> AVOID
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-100 text-zinc-600">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-600">
             <Sparkles size={11} /> RESULT
           </span>
         );
@@ -138,38 +138,38 @@ export default function HistoryDrawer({
             className="w-screen max-w-md bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-zinc-200/80 flex flex-col text-zinc-900"
           >
             {/* Header */}
-            <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-orange-100 text-[#FF4D15] flex items-center justify-center font-bold">
-                  <History size={18} />
+            <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200/60 text-zinc-600 flex items-center justify-center">
+                  <History size={15} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black tracking-tight text-zinc-900">
+                  <h3 className="text-sm font-semibold tracking-tight text-zinc-900">
                     Saved Verdicts & History
                   </h3>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-[11px] text-zinc-400 font-normal">
                     {history.length} {history.length === 1 ? 'record' : 'records'} cached in session
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-zinc-200/60 hover:bg-zinc-200 flex items-center justify-center text-zinc-600 transition"
+                className="w-7 h-7 rounded-lg hover:bg-zinc-200/60 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition cursor-pointer"
               >
-                <X size={18} />
+                <X size={15} />
               </button>
             </div>
 
             {/* User status banner if guest */}
             {!user && (
-              <div className="mx-6 mt-4 p-3 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-between">
-                <div className="text-xs text-zinc-700">
-                  <span className="font-bold text-orange-950 block">Browsing as Guest</span>
-                  Sign in to keep evaluations permanently.
+              <div className="mx-6 mt-3 px-3.5 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200/80 flex items-center justify-between">
+                <div className="text-xs text-zinc-600">
+                  <span className="font-medium text-zinc-900 block text-[11px]">Guest Session</span>
+                  <span className="text-[11px] text-zinc-400">Sign in to save evaluations to your account.</span>
                 </div>
                 <button
                   onClick={() => { onClose(); onOpenAuth(); }}
-                  className="px-3 py-1.5 bg-[#FF4D15] hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition shadow-sm cursor-pointer"
+                  className="px-3 py-1 bg-zinc-900 hover:bg-black text-white text-xs font-medium rounded-lg transition shadow-xs cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -177,28 +177,34 @@ export default function HistoryDrawer({
             )}
 
             {/* Filter Pills & Actions */}
-            <div className="px-6 py-3 border-b border-zinc-100 flex items-center justify-between gap-2">
-              <div className="flex gap-1 bg-zinc-100 p-1 rounded-xl text-xs font-bold">
+            <div className="px-6 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2">
+              <div className="flex gap-1 bg-zinc-100/80 p-0.5 rounded-lg text-xs">
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-2.5 py-1 rounded-lg transition ${
-                    filter === 'all' ? 'bg-white shadow-xs text-zinc-900' : 'text-zinc-500'
+                  className={`px-3 py-1 rounded-md text-xs transition cursor-pointer ${
+                    filter === 'all'
+                      ? 'bg-white shadow-xs text-zinc-900 font-medium'
+                      : 'text-zinc-500 hover:text-zinc-800 font-normal'
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setFilter('verdict')}
-                  className={`px-2.5 py-1 rounded-lg transition ${
-                    filter === 'verdict' ? 'bg-white shadow-xs text-zinc-900' : 'text-zinc-500'
+                  className={`px-3 py-1 rounded-md text-xs transition cursor-pointer ${
+                    filter === 'verdict'
+                      ? 'bg-white shadow-xs text-zinc-900 font-medium'
+                      : 'text-zinc-500 hover:text-zinc-800 font-normal'
                   }`}
                 >
                   Verdicts
                 </button>
                 <button
                   onClick={() => setFilter('search')}
-                  className={`px-2.5 py-1 rounded-lg transition ${
-                    filter === 'search' ? 'bg-white shadow-xs text-zinc-900' : 'text-zinc-500'
+                  className={`px-3 py-1 rounded-md text-xs transition cursor-pointer ${
+                    filter === 'search'
+                      ? 'bg-white shadow-xs text-zinc-900 font-medium'
+                      : 'text-zinc-500 hover:text-zinc-800 font-normal'
                   }`}
                 >
                   Searches
@@ -206,32 +212,32 @@ export default function HistoryDrawer({
               </div>
 
               {history.length > 0 && (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={handleExportReport}
                     title="Export Markdown Report"
-                    className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
                   >
-                    <Download size={16} />
+                    <Download size={15} />
                   </button>
                   <button
                     onClick={onClear}
                     title="Clear All History"
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               )}
             </div>
 
             {/* Content List */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-3">
+            <div className="flex-1 overflow-y-auto p-6 space-y-2.5">
               {filteredHistory.length === 0 ? (
                 <div className="h-64 flex flex-col items-center justify-center text-center text-zinc-400">
-                  <ShoppingBag size={40} className="stroke-1 mb-2 text-zinc-300" />
-                  <p className="text-sm font-semibold text-zinc-600">No evaluations saved yet</p>
-                  <p className="text-xs text-zinc-400 max-w-xs mt-1">
+                  <ShoppingBag size={36} className="stroke-1 mb-2 text-zinc-300" />
+                  <p className="text-xs font-medium text-zinc-600">No evaluations saved yet</p>
+                  <p className="text-[11px] text-zinc-400 max-w-xs mt-1">
                     Paste an Amazon or Flipkart link to generate a synthesis and save it here.
                   </p>
                 </div>
@@ -243,27 +249,27 @@ export default function HistoryDrawer({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="group relative p-4 rounded-2xl bg-zinc-50 hover:bg-orange-50/40 border border-zinc-200/80 hover:border-orange-300/60 transition shadow-xs"
+                    className="group relative p-3.5 rounded-xl bg-zinc-50/70 hover:bg-orange-50/30 border border-zinc-200/70 hover:border-orange-300/50 transition shadow-2xs"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 cursor-pointer" onClick={() => onSelect(item)}>
                         <div className="flex items-center gap-2 mb-1.5">
                           {getVerdictBadge(item.verdict)}
                           {item.store && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                               {item.store}
                             </span>
                           )}
-                          <span className="text-[10px] text-zinc-400 ml-auto">
+                          <span className="text-[10px] text-zinc-400 ml-auto font-normal">
                             {item.timestamp}
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-zinc-800 line-clamp-2 group-hover:text-[#FF4D15] transition">
+                        <h4 className="text-xs font-medium text-zinc-800 line-clamp-2 group-hover:text-[#FF4D15] transition leading-snug">
                           {item.productName || item.query}
                         </h4>
                         {item.price && (
-                          <div className="text-xs font-semibold text-zinc-600 mt-1">
-                            Price at evaluation: <span className="font-bold text-zinc-900">{item.price}</span>
+                          <div className="text-[11px] font-normal text-zinc-500 mt-1">
+                            Price: <span className="font-medium text-zinc-800">{item.price}</span>
                           </div>
                         )}
                       </div>
@@ -271,17 +277,17 @@ export default function HistoryDrawer({
                       <div className="flex flex-col items-end gap-1">
                         <button
                           onClick={() => onSelect(item)}
-                          className="p-1.5 rounded-lg text-zinc-400 group-hover:text-[#FF4D15] hover:bg-orange-100/50 transition"
+                          className="p-1.5 rounded-lg text-zinc-400 group-hover:text-[#FF4D15] hover:bg-orange-100/50 transition cursor-pointer"
                           title="Open Verdict"
                         >
-                          <ArrowUpRight size={16} />
+                          <ArrowUpRight size={15} />
                         </button>
                         <button
                           onClick={() => onDelete(item.id)}
-                          className="p-1.5 rounded-lg text-zinc-300 hover:text-rose-600 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
+                          className="p-1.5 rounded-lg text-zinc-300 hover:text-rose-600 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100 cursor-pointer"
                           title="Delete"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </div>

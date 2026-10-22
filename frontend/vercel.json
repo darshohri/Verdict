@@ -3,5 +3,11 @@
     "api/**/*.py": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/__/auth/:path*",
+      "destination": "https://verdict-e40d2.firebaseapp.com/__/auth/:path*"
+    }
+  ]
 }
