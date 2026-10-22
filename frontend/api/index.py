@@ -371,9 +371,9 @@ Product Data:
         )
         return {
             "apiKey": key,
-            "authDomain": os.getenv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN") or os.getenv("FIREBASE_AUTH_DOMAIN") or "verdict-app-58607.firebaseapp.com",
-            "projectId": os.getenv("NEXT_PUBLIC_FIREBASE_PROJECT_ID") or os.getenv("FIREBASE_PROJECT_ID") or "verdict-app-58607",
-            "storageBucket": os.getenv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") or os.getenv("FIREBASE_STORAGE_BUCKET") or "verdict-app-58607.appspot.com",
+            "authDomain": os.getenv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN") or os.getenv("FIREBASE_AUTH_DOMAIN") or "verdict-e40d2.firebaseapp.com",
+            "projectId": os.getenv("NEXT_PUBLIC_FIREBASE_PROJECT_ID") or os.getenv("FIREBASE_PROJECT_ID") or "verdict-e40d2",
+            "storageBucket": os.getenv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") or os.getenv("FIREBASE_STORAGE_BUCKET") or "verdict-e40d2.appspot.com",
             "appId": os.getenv("NEXT_PUBLIC_FIREBASE_APP_ID") or os.getenv("FIREBASE_APP_ID") or "1:58607713103:web:verdict",
         }
 
