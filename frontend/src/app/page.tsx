@@ -8,6 +8,8 @@ import ScrollCurve from './ScrollCurve';
 import PriceChart from './PriceChart';
 import ShoppingResults from './ShoppingResults';
 import AuthModal, { UserProfile } from './AuthModal';
+import AuthScreen from './AuthScreen';
+import LogoutConfirmModal from './LogoutConfirmModal';
 import HistoryDrawer, { HistoryItem } from './HistoryDrawer';
 import Lenis from 'lenis';
 
@@ -91,7 +93,9 @@ export default function Home() {
 
   // User Authentication & History
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
@@ -111,6 +115,8 @@ export default function Home() {
       }
     } catch (e) {
       console.warn('localStorage error', e);
+    } finally {
+      setIsHydrated(true);
     }
   }, []);
 
@@ -407,6 +413,42 @@ export default function Home() {
     setIsChatOpen(false);
   };
 
+  // 1. Initial hydration splash check
+  if (!isHydrated) {
+    return (
+      <div
+        className="w-full min-h-screen flex items-center justify-center font-sans text-zinc-900"
+        style={{
+          background: 'linear-gradient(to bottom, #DCEBFA 0%, #E8F2FC 40%, #FFFFFF 100%)',
+        }}
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-zinc-200 border-t-[#FF4D15] animate-spin" />
+          <span className="text-[11px] font-black tracking-widest text-zinc-400 uppercase">
+            VERDICT
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Auth Gate: Show Sign In / Sign Up screen before opening Verdict
+  if (!user) {
+    return (
+      <AuthScreen
+        onLogin={handleLogin}
+        onContinueAsGuest={() =>
+          handleLogin({
+            name: 'Guest User',
+            email: '',
+            role: 'Guest Explorer',
+            token: `vdt_guest_${Date.now()}`,
+          })
+        }
+      />
+    );
+  }
+
   return (
     <div
       className={`relative w-full flex flex-col font-sans text-zinc-900 overflow-x-hidden ${isExpanded ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
@@ -476,7 +518,7 @@ export default function Home() {
                 {user.name}
               </span>
               <button
-                onClick={handleLogout}
+                onClick={() => setShowLogoutConfirm(true)}
                 title="Sign Out"
                 className="text-zinc-400 hover:text-rose-600 transition p-1 cursor-pointer"
               >
@@ -960,6 +1002,14 @@ export default function Home() {
         onDelete={handleDeleteHistoryItem}
         user={user}
         onOpenAuth={() => setIsAuthOpen(true)}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        userName={user?.name}
       />
 
     </div>
