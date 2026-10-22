@@ -113,12 +113,15 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
     } catch (err: any) {
       console.warn('Google sign-in status:', err);
 
-      // Graceful fallback if Firebase Google provider is unconfigured in console or blocked
+      // Graceful fallback if Firebase Google provider is unconfigured in console or missing keys on Vercel
       if (
         err.code === 'auth/configuration-not-found' ||
         err.code === 'auth/operation-not-allowed' ||
         err.code === 'auth/unauthorized-domain' ||
-        err.code === 'auth/api-key-not-valid'
+        err.code === 'auth/api-key-not-valid' ||
+        err.code === 'auth/invalid-api-key' ||
+        err.message?.includes('invalid-api-key') ||
+        err.message?.includes('api-key')
       ) {
         const inputEmail = prompt('Enter your Google email to sign in:');
         if (inputEmail && inputEmail.trim()) {
