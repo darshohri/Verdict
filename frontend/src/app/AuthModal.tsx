@@ -90,7 +90,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
     setError(null);
 
     try {
-      const auth = getFirebaseAuth();
+      const auth = await getFirebaseAuth();
       const provider = getGoogleProvider();
 
       if (!auth) {

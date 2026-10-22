@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -14,9 +14,33 @@ export const getFirebaseApp = () => {
   return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 };
 
-export const getFirebaseAuth = () => {
-  const app = getFirebaseApp();
-  return app ? getAuth(app) : null;
+export const getFirebaseAuth = async (): Promise<Auth | null> => {
+  if (typeof window === "undefined") return null;
+
+  if (getApps().length > 0) {
+    return getAuth(getApp());
+  }
+
+  // If apiKey was not inlined at build time, fetch it dynamically from backend
+  if (!firebaseConfig.apiKey) {
+    try {
+      const res = await fetch("/api/index?action=auth-config");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.apiKey) {
+          firebaseConfig.apiKey = data.apiKey;
+          if (data.authDomain) firebaseConfig.authDomain = data.authDomain;
+          if (data.projectId) firebaseConfig.projectId = data.projectId;
+          if (data.appId) firebaseConfig.appId = data.appId;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load dynamic auth config:", e);
+    }
+  }
+
+  const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  return getAuth(app);
 };
 
 export const getGoogleProvider = () => {

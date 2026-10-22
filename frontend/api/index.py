@@ -362,6 +362,21 @@ Product Data:
 
         return {"history": history}
 
+    # ── AUTH CONFIG ───────────────────────────────────────────────────
+    elif action == "auth-config":
+        key = (
+            os.getenv("NEXT_PUBLIC_FIREBASE_API_KEY")
+            or os.getenv("FIREBASE_API_KEY")
+            or ""
+        )
+        return {
+            "apiKey": key,
+            "authDomain": os.getenv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN") or os.getenv("FIREBASE_AUTH_DOMAIN") or "verdict-app-58607.firebaseapp.com",
+            "projectId": os.getenv("NEXT_PUBLIC_FIREBASE_PROJECT_ID") or os.getenv("FIREBASE_PROJECT_ID") or "verdict-app-58607",
+            "storageBucket": os.getenv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") or os.getenv("FIREBASE_STORAGE_BUCKET") or "verdict-app-58607.appspot.com",
+            "appId": os.getenv("NEXT_PUBLIC_FIREBASE_APP_ID") or os.getenv("FIREBASE_APP_ID") or "1:58607713103:web:verdict",
+        }
+
     # ── UNKNOWN ACTION ────────────────────────────────────────────────
     else:
         raise HTTPException(status_code=404, detail="Action not found")
