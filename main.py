@@ -9,9 +9,14 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import uvicorn
+import sys
+api_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "api")
+if api_dir not in sys.path:
+    sys.path.insert(0, api_dir)
 
 # Load API keys from .env file
 load_dotenv()
+
 
 APIFY_TOKEN = os.getenv("APIFY_API_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -24,6 +29,18 @@ apify_client = ApifyClient(APIFY_TOKEN) if APIFY_TOKEN else None
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 app = FastAPI()
+
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+from index import vercel_handler
+app.add_api_route("/api/index", vercel_handler, methods=["GET", "POST"])
 
 from api.routes import shopping
 app.include_router(shopping.router, prefix="/api/v1/verdict/shopping", tags=["Shopping"])

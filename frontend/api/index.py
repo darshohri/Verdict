@@ -13,11 +13,25 @@ if current_dir not in sys.path:
 
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import uvicorn
 
-# Load API keys from .env file
-load_dotenv()
+# Load API keys from .env or .env.local file
+_dotenv_path = find_dotenv(usecwd=True)
+if not _dotenv_path:
+    for candidate in [
+        os.path.abspath(os.path.join(current_dir, "..", "..", ".env")),
+        os.path.abspath(os.path.join(current_dir, "..", ".env.local")),
+        os.path.abspath(os.path.join(current_dir, ".env")),
+    ]:
+        if os.path.exists(candidate):
+            _dotenv_path = candidate
+            break
+
+if _dotenv_path:
+    load_dotenv(_dotenv_path)
+else:
+    load_dotenv()
 
 APIFY_TOKEN = os.getenv("APIFY_API_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
