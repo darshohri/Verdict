@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Mail, User, ArrowRight, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, User, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
 import { getFirebaseAuth, getFirebaseAuthSync, getGoogleProvider } from './lib/firebase';
 import { UserProfile } from './AuthModal';
@@ -168,17 +168,40 @@ export default function AuthScreen({ onLogin, onContinueAsGuest }: AuthScreenPro
         }}
       />
 
-      {/* Top Navbar Header */}
-      <header className="relative z-10 w-full max-w-5xl mx-auto px-6 py-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-black tracking-tight text-zinc-900">VERDICT</span>
-          <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-white/80 border border-zinc-200 text-zinc-600 shadow-2xs">
-            SYS.02
-          </span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-zinc-200 shadow-2xs text-[11px] font-semibold text-zinc-700">
-          <ShieldCheck size={13} className="text-emerald-600" />
-          <span>Consumer Intelligence</span>
+      {/* Top Header - Main Verdict Logo Centered */}
+      <header className="relative z-10 w-full flex items-center justify-center pt-8 md:pt-10 pb-2">
+        <div
+          className="relative select-none"
+          style={{
+            display: 'grid',
+            placeItems: 'center',
+          }}
+        >
+          {/* VERDICT Orange Text */}
+          <h1
+            className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none text-[#FF4D15]"
+            style={{
+              gridArea: '1 / 1',
+              fontSize: 'clamp(48px, 8vw, 76px)',
+              lineHeight: 1,
+              letterSpacing: '-0.04em',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+            }}
+          >
+            VERDIC<span style={{ marginLeft: '0.03em' }}>T</span>
+          </h1>
+
+          {/* Headphones Cutout overlapping in center */}
+          <img
+            src="/headphones-cutout.png"
+            alt="Verdict Logo"
+            className="z-20 object-contain drop-shadow-xl pointer-events-none select-none"
+            style={{
+              gridArea: '1 / 1',
+              width: 'clamp(70px, 11vw, 105px)',
+              height: 'auto',
+            }}
+          />
         </div>
       </header>
 
