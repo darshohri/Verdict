@@ -14,6 +14,30 @@ export const getFirebaseApp = () => {
   return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 };
 
+// Auto-prefetch config as soon as client loads in browser
+if (typeof window !== "undefined" && !firebaseConfig.apiKey) {
+  fetch("/api/index?action=auth-config")
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => {
+      if (data?.apiKey) {
+        firebaseConfig.apiKey = data.apiKey;
+        if (data.authDomain) firebaseConfig.authDomain = data.authDomain;
+        if (data.projectId) firebaseConfig.projectId = data.projectId;
+        if (data.appId) firebaseConfig.appId = data.appId;
+        if (getApps().length === 0) {
+          initializeApp(firebaseConfig);
+        }
+      }
+    })
+    .catch(() => {});
+}
+
+export const getFirebaseAuthSync = (): Auth | null => {
+  if (typeof window === "undefined") return null;
+  const app = getApps().length > 0 ? getApp() : (firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null);
+  return app ? getAuth(app) : null;
+};
+
 export const getFirebaseAuth = async (): Promise<Auth | null> => {
   if (typeof window === "undefined") return null;
 

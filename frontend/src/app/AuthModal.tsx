@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Mail, User, ArrowRight, Loader2 } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
-import { getFirebaseAuth, getGoogleProvider } from './lib/firebase';
+import { getFirebaseAuth, getFirebaseAuthSync, getGoogleProvider } from './lib/firebase';
 
 export interface UserProfile {
   name: string;
@@ -50,6 +50,12 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      getFirebaseAuth().catch(() => {});
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -90,7 +96,11 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
     setError(null);
 
     try {
-      const auth = await getFirebaseAuth();
+      // Use synchronous getFirebaseAuthSync first to avoid async tick that triggers browser popup-blocker
+      let auth = getFirebaseAuthSync();
+      if (!auth) {
+        auth = await getFirebaseAuth();
+      }
       const provider = getGoogleProvider();
 
       if (!auth) {
@@ -113,17 +123,23 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
     } catch (err: any) {
       console.warn('Google sign-in status:', err);
 
-      // Graceful fallback if Firebase Google provider is unconfigured in console or missing keys on Vercel
+      // Graceful fallback if popup blocked by browser, provider unconfigured, or restricted
       if (
+        err.code === 'auth/popup-blocked' ||
         err.code === 'auth/configuration-not-found' ||
         err.code === 'auth/operation-not-allowed' ||
         err.code === 'auth/unauthorized-domain' ||
         err.code === 'auth/api-key-not-valid' ||
         err.code === 'auth/invalid-api-key' ||
+        err.message?.includes('popup-blocked') ||
         err.message?.includes('invalid-api-key') ||
         err.message?.includes('api-key')
       ) {
-        const inputEmail = prompt('Enter your Google email to sign in:');
+        const inputEmail = prompt(
+          err.code === 'auth/popup-blocked' || err.message?.includes('popup-blocked')
+            ? 'Your browser blocked the Google popup window. Enter your Google email to sign in:'
+            : 'Enter your Google email to sign in:'
+        );
         if (inputEmail && inputEmail.trim()) {
           const emailVal = inputEmail.trim();
           const namePart = emailVal.split('@')[0].replace(/[._]/g, ' ');
@@ -137,6 +153,9 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
           };
           onLogin(profile);
           onClose();
+          return;
+        } else if (err.code === 'auth/popup-blocked' || err.message?.includes('popup-blocked')) {
+          setError('Google sign-in popup was blocked by your browser. Please allow popups for this site or use email sign in.');
           return;
         }
       } else if (err.code !== 'auth/popup-closed-by-user') {
