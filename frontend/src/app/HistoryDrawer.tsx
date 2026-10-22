@@ -290,10 +290,10 @@ export default function HistoryDrawer({
               )}
             </div>
 
-            {/* Footer with Academic Note */}
+            {/* Footer */}
             <div className="p-4 border-t border-zinc-100 bg-zinc-50/80 text-[11px] text-zinc-400 flex items-center justify-between">
-              <span>Data Store: D1 Cache & State</span>
-              <span>Viva Tip: Fast instant demo reload</span>
+              <span>Saved locally in browser</span>
+              <span>Verdict Intelligence</span>
             </div>
           </motion.div>
         </div>

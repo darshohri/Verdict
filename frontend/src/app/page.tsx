@@ -11,72 +11,6 @@ import AuthModal, { UserProfile } from './AuthModal';
 import HistoryDrawer, { HistoryItem } from './HistoryDrawer';
 import Lenis from 'lenis';
 
-const SEED_HISTORY: HistoryItem[] = [
-  {
-    id: 'seed-sony-xm5',
-    query: 'https://www.amazon.in/dp/B09XS7JWHH',
-    type: 'evaluation',
-    store: 'amazon',
-    verdict: 'BUY',
-    confidenceScore: 94,
-    productName: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones',
-    price: '₹29,990',
-    timestamp: 'Yesterday',
-    data: {
-      product_name: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones',
-      product_price: '₹29,990',
-      product_image: 'https://m.media-amazon.com/images/I/61+ElxrSTSL._SL1500_.jpg',
-      verdict: 'BUY',
-      confidence_score: 94,
-      executive_summary: 'Superb noise cancellation, 30-hour battery life, and crystal-clear call quality make this an industry-standard benchmark for premium audio.',
-      pros: [
-        'Class-leading active noise cancellation (ANC)',
-        'Extremely lightweight & comfortable headband design',
-        '30-hour continuous playback with quick charging',
-        'Multipoint Bluetooth connection with LDAC codec support'
-      ],
-      cons: [
-        'Non-folding hinges require a larger carrying case',
-        'Premium price tag compared to previous generation'
-      ],
-      hidden_flaws: [
-        'Synthetic leather earcups may warm up during prolonged humid use'
-      ]
-    }
-  },
-  {
-    id: 'seed-iphone-15',
-    query: 'https://www.flipkart.com/apple-iphone-15-black-128-gb/p/itm6ac6485515ae4',
-    type: 'evaluation',
-    store: 'flipkart',
-    verdict: 'WAIT',
-    confidenceScore: 82,
-    productName: 'Apple iPhone 15 (Black, 128 GB)',
-    price: '₹65,999',
-    timestamp: '2 days ago',
-    data: {
-      product_name: 'Apple iPhone 15 (Black, 128 GB)',
-      product_price: '₹65,999',
-      product_image: 'https://rukminim2.flixcart.com/image/832/832/xif0q/mobile/h/d/9/-original-imagtc2qzgnnuhxh.jpeg',
-      verdict: 'WAIT',
-      confidence_score: 82,
-      executive_summary: 'Features the 48MP primary sensor and Dynamic Island, but historical sale trends show significant price reductions (under ₹58,000) during festival clearances.',
-      pros: [
-        'Dynamic Island with USB-C convenience',
-        'Great 48MP main camera image pipeline',
-        'Bright 2000-nit outdoor Super Retina XDR display'
-      ],
-      cons: [
-        'Still limited to 60Hz refresh rate',
-        'Current non-sale price represents peak retail pricing'
-      ],
-      hidden_flaws: [
-        'Thermal throttling observed under sustained gaming loads'
-      ]
-    }
-  }
-];
-
 let audioCtx: AudioContext | null = null;
 
 const playDeepReverb = () => {
@@ -89,7 +23,7 @@ const playDeepReverb = () => {
     audioCtx.resume();
   }
   const ctx = audioCtx;
-  
+
   const masterGain = ctx.createGain();
   masterGain.gain.value = 1.0;
   masterGain.connect(ctx.destination);
@@ -150,9 +84,9 @@ export default function Home() {
   const [chatMessage, setChatMessage] = useState('');
   const [isChatting, setIsChatting] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [loadingStep, setLoadingStep] = useState(0);
-  
+
   const [clickCount, setClickCount] = useState(0);
 
   // User Authentication & History
@@ -171,13 +105,10 @@ export default function Home() {
       const storedHistory = localStorage.getItem('verdict_history');
       if (storedHistory) {
         const parsed = JSON.parse(storedHistory);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setHistory(parsed);
-          return;
         }
       }
-      setHistory(SEED_HISTORY);
-      localStorage.setItem('verdict_history', JSON.stringify(SEED_HISTORY));
     } catch (e) {
       console.warn('localStorage error', e);
     }
@@ -242,7 +173,7 @@ export default function Home() {
   };
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (isChatOpen) {
       // Small timeout to allow framer-motion layout animation to calculate first
@@ -255,11 +186,11 @@ export default function Home() {
   const lastClickTime = React.useRef(0);
   const handleHeadphoneClick = () => {
     if (isExpanded) return;
-    
+
     const now = Date.now();
     if (now - lastClickTime.current < 1000) return;
     lastClickTime.current = now;
-    
+
     playDeepReverb();
     setClickCount(prev => prev + 1);
   };
@@ -292,7 +223,7 @@ export default function Home() {
       mouseX.set(normalizedX);
       mouseY.set(normalizedY);
     };
-    
+
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
@@ -304,7 +235,7 @@ export default function Home() {
       // Amazon is faster (~8s), Flipkart via Apify takes longer (~16s)
       const isAmazon = url.toLowerCase().includes('amazon');
       const intervalTime = isAmazon ? 2000 : 4000;
-      
+
       interval = setInterval(() => {
         setLoadingStep(prev => {
           if (prev < loadingMessages.length - 1) {
@@ -322,7 +253,7 @@ export default function Home() {
 
     const trimmedUrl = url.trim().toLowerCase();
     const isUrl = trimmedUrl.startsWith('http') || trimmedUrl.startsWith('www.') || trimmedUrl.includes('.com') || trimmedUrl.includes('.in');
-    
+
     // Check if it's an evaluation of a single URL or a natural language search
     let action = 'evaluate';
     if (!isUrl) {
@@ -333,19 +264,19 @@ export default function Home() {
         setError("Please paste a link to a specific product (e.g. amazon.com/dp/B08X...), not the store's homepage.");
         return;
       }
-      
+
       const isSupported = cleanedUrl.startsWith('amazon.com/') || cleanedUrl.startsWith('amazon.in/') || cleanedUrl.startsWith('flipkart.com/');
       if (!isSupported) {
         setError("Hold up! Verdict currently only supports Amazon and Flipkart product links. Please drop a valid link from either of those stores.");
         return;
       }
     }
-    
+
     setIsAnalyzing(true);
     setError(null);
     setResult(null);
     setSearchResults(null);
-    
+
     const startTime = Date.now();
     const minLoadingTime = isUrl ? (trimmedUrl.includes('amazon') ? 8000 : 16000) : 12000;
 
@@ -366,7 +297,7 @@ export default function Home() {
       if (data.error) {
         throw new Error(data.error);
       }
-      
+
       const elapsedTime = Date.now() - startTime;
       if (elapsedTime < minLoadingTime) {
         await new Promise(r => setTimeout(r, minLoadingTime - elapsedTime));
@@ -408,17 +339,17 @@ export default function Home() {
 
   const handleChat = async () => {
     if (!chatMessage.trim()) return;
-    
+
     const userMsg = chatMessage;
     setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
     setChatMessage('');
     setIsChatting(true);
-    
+
     try {
       const response = await fetch('/api/index?action=chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: userMsg,
           context: result ? JSON.stringify(result) : (searchResults ? JSON.stringify(searchResults) : "")
         }),
@@ -477,25 +408,25 @@ export default function Home() {
   };
 
   return (
-    <div 
+    <div
       className={`relative w-full flex flex-col font-sans text-zinc-900 overflow-x-hidden ${isExpanded ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
       style={{ background: 'linear-gradient(to bottom, #C4E0FA 0%, #DCEBFA 40%, #FFFFFF 100%)' }}
     >
       {/* Subtle Architectural Grid Overlay */}
-      <div 
+      <div
         className="absolute inset-0 z-0 pointer-events-none opacity-40"
-        style={{ 
+        style={{
           backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)',
           backgroundSize: '40px 40px'
         }}
       />
-      
+
       {/* Top Nav */}
       <nav className="w-full px-6 py-6 md:px-12 md:py-8 flex justify-between items-center z-40 relative shrink-0">
         <div>
           <AnimatePresence>
             {isExpanded && (
-              <motion.button 
+              <motion.button
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -529,9 +460,18 @@ export default function Home() {
           {/* Auth / Profile Button */}
           {user ? (
             <div className="flex items-center gap-2 bg-white/90 border border-zinc-200/90 rounded-full pl-2 pr-3 py-1 shadow-xs backdrop-blur-md">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF4D15] to-amber-500 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.name}
+                  className="w-7 h-7 rounded-full object-cover shadow-xs border border-zinc-100"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF4D15] to-amber-500 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="text-xs font-bold text-zinc-800 max-w-[120px] truncate">
                 {user.name}
               </span>
@@ -556,19 +496,19 @@ export default function Home() {
       </nav>
 
       {/* Hero Section - Shrinks and moves up to make space for results */}
-      <motion.div 
+      <motion.div
         layout
         initial={false}
-        animate={{ 
-          height: isExpanded ? (typeof window !== 'undefined' && window.innerWidth >= 768 ? 160 : 120) : 'calc(100vh - 200px)' 
+        animate={{
+          height: isExpanded ? (typeof window !== 'undefined' && window.innerWidth >= 768 ? 160 : 120) : 'calc(100vh - 200px)'
         }}
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="w-full flex flex-col items-center justify-center shrink-0"
       >
-        <motion.main 
+        <motion.main
           className="w-full relative z-10 select-none"
-          style={{ 
-            display: 'grid', 
+          style={{
+            display: 'grid',
             placeItems: 'center',
             transformOrigin: 'center'
           }}
@@ -578,12 +518,12 @@ export default function Home() {
           }}
           transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <motion.h1 
+          <motion.h1
             className="z-10 font-black tracking-tighter whitespace-nowrap pointer-events-none select-none"
-            style={{ 
-              gridArea: '1 / 1', 
-              fontSize: 'clamp(64px, 22vw, 360px)', 
-              color: '#FF4D15', 
+            style={{
+              gridArea: '1 / 1',
+              fontSize: 'clamp(64px, 22vw, 360px)',
+              color: '#FF4D15',
               lineHeight: 1,
               fontFamily: 'system-ui, -apple-system, sans-serif'
             }}
@@ -600,7 +540,7 @@ export default function Home() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 className="absolute z-10 rounded-full pointer-events-none mix-blend-multiply"
-                style={{ 
+                style={{
                   width: 'clamp(300px, 45vw, 600px)',
                   height: 'clamp(300px, 45vw, 600px)',
                   gridArea: '1 / 1',
@@ -609,20 +549,20 @@ export default function Home() {
               />
             )}
           </AnimatePresence>
-          
+
           {/* The Physical Object (Middle Layer) */}
-          <motion.img 
+          <motion.img
             draggable={false}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
             whileTap={isExpanded ? {} : { scale: 0.95 }}
             onClick={handleHeadphoneClick}
-            src="/headphones-cutout.png" 
-            alt="Product Visual" 
+            src="/headphones-cutout.png"
+            alt="Product Visual"
             className={`z-20 object-contain drop-shadow-2xl select-none ${isExpanded ? 'pointer-events-none' : 'cursor-pointer'}`}
-            style={{ 
-              gridArea: '1 / 1', 
+            style={{
+              gridArea: '1 / 1',
               width: 'clamp(300px, 45vw, 600px)',
               x: headphoneX,
               y: headphoneY,
@@ -636,22 +576,22 @@ export default function Home() {
       </motion.div>
 
       {/* Bottom Search Dock */}
-      <motion.div 
-        layout 
+      <motion.div
+        layout
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className={`relative z-30 w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center ${isExpanded ? 'pb-8 pt-4 md:pt-8 md:pb-12' : 'pb-8'}`}
       >
         <div className={`w-full bg-white rounded-[2rem] p-2 md:p-3 border flex items-center gap-2 md:gap-3 relative transition-all duration-500 ${isExpanded ? 'shadow-lg border-zinc-200' : 'shadow-2xl border-zinc-200 hover:shadow-3xl'}`}>
           <div className="pl-3 md:pl-4 text-zinc-400 shrink-0"><Search size={22} className="w-5 h-5 md:w-6 md:h-6" /></div>
-          <input 
-            type="text" 
-            placeholder="Paste Amazon/Flipkart URL or search for a product..." 
+          <input
+            type="text"
+            placeholder="Paste Amazon/Flipkart URL or search for a product..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
             className="flex-1 min-w-0 bg-transparent border-none outline-none text-zinc-800 placeholder:text-zinc-400 font-medium py-3 text-xs sm:text-sm md:text-base"
           />
-          <button 
+          <button
             onClick={handleAnalyze}
             disabled={isAnalyzing}
             className="bg-black hover:bg-[#FF4D15] text-white px-5 md:px-8 py-3 md:py-3.5 rounded-xl md:rounded-2xl font-bold uppercase text-[10px] md:text-[11px] tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 group shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
@@ -664,196 +604,196 @@ export default function Home() {
           </button>
         </div>
       </motion.div>
-      
+
       {/* Dynamic Results Dashboard */}
       <div ref={resultsRef} className={`relative w-full transition-all duration-1000 ease-in-out flex-1 flex flex-col ${isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 pointer-events-none h-0 overflow-hidden'}`}>
         {/* Scroll-driven decorative curve — full width behind everything */}
         {(result || searchResults) && !isAnalyzing && !error && <ScrollCurve containerRef={resultsRef} />}
 
         <div className="w-full max-w-5xl mx-auto px-6 relative z-10">
-        
-        <AnimatePresence mode="wait">
-          {/* Error State */}
-          {error && (
-            <motion.div 
-              key="error"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className={`w-full ${error.startsWith('INFO:') ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-red-50 border-red-200 text-red-700'} rounded-2xl p-6 flex items-start gap-4 mb-8`}
-            >
-              <AlertCircle className="shrink-0 mt-1" />
-              <div>
-                <h3 className="font-bold mb-1">{error.startsWith('INFO:') ? 'More Details Needed' : 'Analysis Failed'}</h3>
-                <p className="text-sm opacity-80">{error.startsWith('INFO:') ? error.replace('INFO:', '') : error}</p>
-              </div>
-            </motion.div>
-          )}
 
-          {/* Loading State */}
-          {isAnalyzing && !error && (
-            <motion.div 
-              key="loading"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full h-full flex flex-col items-center justify-center pt-8 pb-24 text-zinc-400 gap-6"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div 
-                  key={loadingStep} 
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className="flex flex-col items-center gap-4 text-center"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-500 mb-2">
-                    <Loader2 size={24} className="animate-spin" />
-                  </div>
-                  <h3 className="text-zinc-800 font-bold tracking-tight text-2xl">{loadingMessages[loadingStep].title}</h3>
-                  <p className="text-base text-zinc-500 max-w-sm">{loadingMessages[loadingStep].desc}</p>
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          )}
+          <AnimatePresence mode="wait">
+            {/* Error State */}
+            {error && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                className={`w-full ${error.startsWith('INFO:') ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-red-50 border-red-200 text-red-700'} rounded-2xl p-6 flex items-start gap-4 mb-8`}
+              >
+                <AlertCircle className="shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold mb-1">{error.startsWith('INFO:') ? 'More Details Needed' : 'Analysis Failed'}</h3>
+                  <p className="text-sm opacity-80">{error.startsWith('INFO:') ? error.replace('INFO:', '') : error}</p>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Success Results State */}
-          {result && !isAnalyzing && !error && (
-            <motion.div 
-              key="result"
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="w-full pb-24"
-            >
-              {/* Product Header */}
-              <motion.div variants={itemVariants} className="relative overflow-hidden mb-16 bg-white p-8 md:p-12 rounded-[2.5rem] border border-zinc-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
-                <div className="flex flex-col md:flex-row items-center gap-12 relative z-10">
-                  <div className="relative w-48 h-48 md:w-72 md:h-72 shrink-0 group">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-zinc-50 rounded-[2rem] transform transition-transform duration-700 group-hover:scale-105 group-hover:rotate-3" />
-                    <div className="absolute inset-0 flex items-center justify-center p-6 transform transition-transform duration-700 group-hover:scale-110">
-                      <img src={result.product_image ? `https://wsrv.nl/?url=${encodeURIComponent(result.product_image)}` : "/headphones-cutout.png"} alt="Product" className="w-full h-full object-contain mix-blend-multiply filter drop-shadow-xl" />
+            {/* Loading State */}
+            {isAnalyzing && !error && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full h-full flex flex-col items-center justify-center pt-8 pb-24 text-zinc-400 gap-6"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={loadingStep}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="flex flex-col items-center gap-4 text-center"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-500 mb-2">
+                      <Loader2 size={24} className="animate-spin" />
                     </div>
-                  </div>
-                  <div className="flex-1 text-center md:text-left flex flex-col justify-center">
+                    <h3 className="text-zinc-800 font-bold tracking-tight text-2xl">{loadingMessages[loadingStep].title}</h3>
+                    <p className="text-base text-zinc-500 max-w-sm">{loadingMessages[loadingStep].desc}</p>
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            )}
 
-                    <h3 className="text-3xl md:text-5xl font-semibold tracking-tight text-zinc-700 mb-8 leading-[1.1] max-w-3xl">
-                      {result.product_name || "Unknown Product"}
-                    </h3>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                      {(() => {
-                        const style = getVerdictGlassStyle(result.verdict);
-                        const IconComp = style.Icon;
-                        return (
-                          <div className="inline-flex items-center gap-4 p-1.5 pr-6 rounded-full bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-sm transition-transform duration-300 hover:scale-[1.02]">
-                            
-                            {/* The Verdict Section (Premium Solid Pill) */}
-                            <div className={`flex items-center gap-2 px-5 py-2 rounded-full ${style.badgeBg} shadow-sm`}>
-                              <IconComp className={`w-4 h-4 ${style.badgeText}`} strokeWidth={2.5} />
-                              <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-bold tracking-[0.2em] uppercase opacity-90 ${style.badgeText}`}>
-                                  VERDICT
-                                </span>
-                                <span className={`text-sm font-black tracking-widest uppercase ${style.badgeText}`}>
-                                  {result.verdict}
-                                </span>
+            {/* Success Results State */}
+            {result && !isAnalyzing && !error && (
+              <motion.div
+                key="result"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="w-full pb-24"
+              >
+                {/* Product Header */}
+                <motion.div variants={itemVariants} className="relative overflow-hidden mb-16 bg-white p-8 md:p-12 rounded-[2.5rem] border border-zinc-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
+                  <div className="flex flex-col md:flex-row items-center gap-12 relative z-10">
+                    <div className="relative w-48 h-48 md:w-72 md:h-72 shrink-0 group">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-zinc-50 rounded-[2rem] transform transition-transform duration-700 group-hover:scale-105 group-hover:rotate-3" />
+                      <div className="absolute inset-0 flex items-center justify-center p-6 transform transition-transform duration-700 group-hover:scale-110">
+                        <img src={result.product_image ? `https://wsrv.nl/?url=${encodeURIComponent(result.product_image)}` : "/headphones-cutout.png"} alt="Product" className="w-full h-full object-contain mix-blend-multiply filter drop-shadow-xl" />
+                      </div>
+                    </div>
+                    <div className="flex-1 text-center md:text-left flex flex-col justify-center">
+
+                      <h3 className="text-3xl md:text-5xl font-semibold tracking-tight text-zinc-700 mb-8 leading-[1.1] max-w-3xl">
+                        {result.product_name || "Unknown Product"}
+                      </h3>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                        {(() => {
+                          const style = getVerdictGlassStyle(result.verdict);
+                          const IconComp = style.Icon;
+                          return (
+                            <div className="inline-flex items-center gap-4 p-1.5 pr-6 rounded-full bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-sm transition-transform duration-300 hover:scale-[1.02]">
+
+                              {/* The Verdict Section (Premium Solid Pill) */}
+                              <div className={`flex items-center gap-2 px-5 py-2 rounded-full ${style.badgeBg} shadow-sm`}>
+                                <IconComp className={`w-4 h-4 ${style.badgeText}`} strokeWidth={2.5} />
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`text-[9px] font-bold tracking-[0.2em] uppercase opacity-90 ${style.badgeText}`}>
+                                    VERDICT
+                                  </span>
+                                  <span className={`text-sm font-black tracking-widest uppercase ${style.badgeText}`}>
+                                    {result.verdict}
+                                  </span>
+                                </div>
                               </div>
+
+                              {/* The Confidence Section */}
+                              {result.confidence_score !== undefined && (
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-1.5 h-1.5 rounded-full ${style.dotColor} animate-pulse`} />
+                                  <span className="text-xs font-bold tracking-wide text-zinc-800">
+                                    {result.confidence_score}% <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase ml-1 hidden sm:inline">CONFIDENCE</span>
+                                  </span>
+                                </div>
+                              )}
+
                             </div>
-
-                            {/* The Confidence Section */}
-                            {result.confidence_score !== undefined && (
-                              <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${style.dotColor} animate-pulse`} />
-                                <span className="text-xs font-bold tracking-wide text-zinc-800">
-                                  {result.confidence_score}% <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase ml-1 hidden sm:inline">CONFIDENCE</span>
-                                </span>
-                              </div>
-                            )}
-                            
-                          </div>
-                        );
-                      })()}
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-
-              {/* Header / Verdict Summary */}
-              <motion.div variants={itemVariants} className="mb-20 px-4 md:px-8 relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4D15] rounded-full hidden md:block" />
-                <h2 className="text-xl md:text-3xl font-medium tracking-tight text-zinc-800 leading-relaxed max-w-4xl">
-                  {result.executive_summary}
-                </h2>
-              </motion.div>
-
-              <PriceChart url={url} price={result.product_price} />
-
-              {/* Grid Layout for details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16">
-                {/* Pros */}
-                <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-green-500/10 hover:border-green-200 group">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
-                      <CheckCircle2 size={24} strokeWidth={2.5} />
-                    </div>
-                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Good</h3>
-                  </div>
-                  <ul className="space-y-5">
-                    {result.pros_recap.map((pro: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
-                        <div className="w-2 h-2 rounded-full bg-green-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
-                        <span className="flex-1">{pro}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </motion.div>
 
-                {/* Cons */}
-                <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-red-500/10 hover:border-red-200 group">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                      <Minus size={24} strokeWidth={2.5} />
-                    </div>
-                    <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Bad</h3>
-                  </div>
-                  <ul className="space-y-5">
-                    {result.cons_recap.map((con: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
-                        <div className="w-2 h-2 rounded-full bg-red-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
-                        <span className="flex-1">{con}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Header / Verdict Summary */}
+                <motion.div variants={itemVariants} className="mb-20 px-4 md:px-8 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4D15] rounded-full hidden md:block" />
+                  <h2 className="text-xl md:text-3xl font-medium tracking-tight text-zinc-800 leading-relaxed max-w-4xl">
+                    {result.executive_summary}
+                  </h2>
                 </motion.div>
 
-                {/* Price Trend & Auth */}
-                <div className="flex flex-col gap-6 md:gap-8">
-                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF4D15]/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
-                    <div className="flex items-center gap-4 mb-6 text-zinc-400 relative z-10">
-                      <TrendingDown size={22} className="text-[#FF4D15] group-hover:scale-110 transition-transform" />
-                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Price Trend</h3>
+                <PriceChart url={url} price={result.product_price} />
+
+                {/* Grid Layout for details */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16">
+                  {/* Pros */}
+                  <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-green-500/10 hover:border-green-200 group">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                        <CheckCircle2 size={24} strokeWidth={2.5} />
+                      </div>
+                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Good</h3>
                     </div>
-                    <p className="text-base leading-relaxed text-zinc-600 relative z-10">
-                      {result.price_trend_summary}
-                    </p>
+                    <ul className="space-y-5">
+                      {result.pros_recap.map((pro: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
+                          <div className="w-2 h-2 rounded-full bg-green-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
+                          <span className="flex-1">{pro}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </motion.div>
-                  
-                  <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm flex-1 transition-all hover:shadow-xl group">
-                    <div className="flex items-center gap-4 mb-6 text-zinc-400">
-                      <AlertCircle size={22} className="text-blue-500 group-hover:scale-110 transition-transform" />
-                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Authenticity</h3>
+
+                  {/* Cons */}
+                  <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-2xl hover:shadow-red-500/10 hover:border-red-200 group">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                        <Minus size={24} strokeWidth={2.5} />
+                      </div>
+                      <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">The Bad</h3>
                     </div>
-                    <p className="text-base leading-relaxed text-zinc-600">
-                      {result.review_authenticity_summary}
-                    </p>
+                    <ul className="space-y-5">
+                      {result.cons_recap.map((con: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-4 text-base leading-relaxed text-zinc-600">
+                          <div className="w-2 h-2 rounded-full bg-red-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                          <span className="flex-1">{con}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </motion.div>
+
+                  {/* Price Trend & Auth */}
+                  <div className="flex flex-col gap-6 md:gap-8">
+                    <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm transition-all hover:shadow-xl relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF4D15]/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
+                      <div className="flex items-center gap-4 mb-6 text-zinc-400 relative z-10">
+                        <TrendingDown size={22} className="text-[#FF4D15] group-hover:scale-110 transition-transform" />
+                        <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Price Trend</h3>
+                      </div>
+                      <p className="text-base leading-relaxed text-zinc-600 relative z-10">
+                        {result.price_trend_summary}
+                      </p>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants} whileHover={{ y: -4, x: 4 }} className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200 shadow-sm flex-1 transition-all hover:shadow-xl group">
+                      <div className="flex items-center gap-4 mb-6 text-zinc-400">
+                        <AlertCircle size={22} className="text-blue-500 group-hover:scale-110 transition-transform" />
+                        <h3 className="font-bold tracking-widest uppercase text-sm text-zinc-900">Authenticity</h3>
+                      </div>
+                      <p className="text-base leading-relaxed text-zinc-600">
+                        {result.review_authenticity_summary}
+                      </p>
+                    </motion.div>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Supporting Evidence */}
-              <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-zinc-200 shadow-sm">
-                 <div className="flex items-center gap-3 mb-10">
-                   <div className="w-2 h-8 bg-[#FF4D15] rounded-full" />
-                   <h3 className="font-black tracking-widest uppercase text-lg text-zinc-900">Deep Dive</h3>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                   {result.supporting_evidence.map((evidence: any, idx: number) => {
+
+                {/* Supporting Evidence */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-zinc-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-10">
+                    <div className="w-2 h-8 bg-[#FF4D15] rounded-full" />
+                    <h3 className="font-black tracking-widest uppercase text-lg text-zinc-900">Deep Dive</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                    {result.supporting_evidence.map((evidence: any, idx: number) => {
                       if (typeof evidence === 'string') {
                         // Graceful fallback if LLM disobeys JSON schema
                         const cleanEvidence = evidence.replace(/^[\s\W]*(bullet point|point|bullet|-)[\s\W]*/gi, '');
@@ -869,21 +809,20 @@ export default function Home() {
 
                       const isPositive = evidence.sentiment?.toLowerCase() === 'positive';
                       const isNegative = evidence.sentiment?.toLowerCase() === 'negative';
-                      
+
                       return (
                         <div key={idx} className="flex items-start gap-5 group p-4 -ml-4 rounded-2xl hover:bg-zinc-50/80 transition-colors border border-transparent hover:border-zinc-100">
-                          <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
-                            isPositive ? 'bg-green-100 text-green-600' :
-                            isNegative ? 'bg-red-100 text-red-600' :
-                            'bg-amber-100 text-amber-600'
-                          }`}>
+                          <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${isPositive ? 'bg-green-100 text-green-600' :
+                              isNegative ? 'bg-red-100 text-red-600' :
+                                'bg-amber-100 text-amber-600'
+                            }`}>
                             {isPositive ? <CheckCircle2 size={16} strokeWidth={3} /> :
-                             isNegative ? <X size={16} strokeWidth={3} /> :
-                             <Minus size={16} strokeWidth={3} />}
+                              isNegative ? <X size={16} strokeWidth={3} /> :
+                                <Minus size={16} strokeWidth={3} />}
                           </div>
                           <div>
                             <h4 className="font-bold text-zinc-900 text-[15px] mb-1.5 flex items-center gap-2">
-                                {evidence.topic || 'Feature'}
+                              {evidence.topic || 'Feature'}
                             </h4>
                             <p className="text-[14px] text-zinc-600 leading-relaxed">
                               {evidence.summary}
@@ -891,17 +830,17 @@ export default function Home() {
                           </div>
                         </div>
                       );
-                   })}
-                 </div>
+                    })}
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
+            )}
 
-          {/* Search Results State */}
-          {searchResults && !isAnalyzing && !error && (
-            <ShoppingResults data={searchResults} />
-          )}
-        </AnimatePresence>
+            {/* Search Results State */}
+            {searchResults && !isAnalyzing && !error && (
+              <ShoppingResults data={searchResults} />
+            )}
+          </AnimatePresence>
         </div>{/* close inner max-w wrapper */}
       </div>
 
@@ -909,7 +848,7 @@ export default function Home() {
       {(result || searchResults) && !isAnalyzing && !error && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
           {/* Chat Window */}
-          <motion.div 
+          <motion.div
             layout
             initial={false}
             animate={{
@@ -917,9 +856,8 @@ export default function Home() {
               opacity: isChatOpen ? 1 : 0
             }}
             transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-            className={`origin-bottom-right mb-4 ${
-              isChatOpen ? 'pointer-events-auto' : 'pointer-events-none'
-            } w-[380px] bg-white/90 backdrop-blur-md border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col`}
+            className={`origin-bottom-right mb-4 ${isChatOpen ? 'pointer-events-auto' : 'pointer-events-none'
+              } w-[380px] bg-white/90 backdrop-blur-md border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col`}
           >
             {/* Header */}
             <div className="p-5 flex items-center justify-between bg-gradient-to-r from-[#DCEBFA] to-white border-b border-zinc-100">
@@ -930,9 +868,9 @@ export default function Home() {
                 <h3 className="font-bold tracking-tight text-zinc-900 text-base">Verdict AI Assistant</h3>
               </div>
             </div>
-            
+
             {/* Messages */}
-            <div 
+            <div
               className="max-h-[60vh] p-5 overflow-y-auto flex flex-col gap-4 bg-white/50 scroll-smooth"
               onWheel={(e) => e.stopPropagation()}
               onTouchMove={(e) => e.stopPropagation()}
@@ -945,11 +883,10 @@ export default function Home() {
               ) : (
                 chatHistory.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] p-4 text-[15px] leading-relaxed shadow-sm ${
-                      msg.role === 'user' 
-                        ? 'bg-[#FF4D15] text-white rounded-2xl rounded-tr-sm' 
+                    <div className={`max-w-[85%] p-4 text-[15px] leading-relaxed shadow-sm ${msg.role === 'user'
+                        ? 'bg-[#FF4D15] text-white rounded-2xl rounded-tr-sm'
                         : 'bg-white border border-zinc-100 text-zinc-800 rounded-2xl rounded-tl-sm'
-                    }`}>
+                      }`}>
                       {msg.role === 'assistant' ? (
                         <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-li:my-1 prose-ul:list-disc prose-ul:ml-4 prose-ol:list-decimal prose-ol:ml-4 prose-strong:font-bold prose-strong:text-black">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -972,7 +909,7 @@ export default function Home() {
               )}
               <div ref={chatEndRef} />
             </div>
-            
+
             {/* Input */}
             <div className="p-3 bg-white border-t border-zinc-100">
               <div className="flex items-center gap-2 bg-zinc-50 rounded-xl p-2 border border-zinc-200 focus-within:border-[#FF4D15]/50 transition-colors">
@@ -984,7 +921,7 @@ export default function Home() {
                   placeholder="Ask a question..."
                   className="flex-1 bg-transparent border-none outline-none text-xs px-2 text-zinc-900 placeholder:text-zinc-400"
                 />
-                <button 
+                <button
                   onClick={handleChat}
                   disabled={!chatMessage.trim() || isChatting}
                   className="w-8 h-8 flex items-center justify-center text-[#FF4D15] hover:text-[#FF6A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
@@ -996,11 +933,10 @@ export default function Home() {
           </motion.div>
 
           {/* FAB Button */}
-          <button 
+          <button
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-105 ${
-              isChatOpen ? 'bg-[#FF4D15] hover:bg-[#FF6A3D] rotate-90' : 'bg-[#FF4D15] hover:bg-[#FF6A3D]'
-            }`}
+            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-105 ${isChatOpen ? 'bg-[#FF4D15] hover:bg-[#FF6A3D] rotate-90' : 'bg-[#FF4D15] hover:bg-[#FF6A3D]'
+              }`}
           >
             {isChatOpen ? <X size={24} /> : <Sparkles size={24} />}
           </button>
