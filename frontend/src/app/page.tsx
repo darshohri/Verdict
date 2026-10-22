@@ -1,13 +1,81 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, Menu, Loader2, CheckCircle2, AlertCircle, TrendingDown, TrendingUp, Minus, MessageSquare, Send, Sparkles, X, Clock, AlertTriangle, User, History, LogOut } from 'lucide-react';
 import { motion, AnimatePresence, Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import ScrollCurve from './ScrollCurve';
 import PriceChart from './PriceChart';
 import ShoppingResults from './ShoppingResults';
+import AuthModal, { UserProfile } from './AuthModal';
+import HistoryDrawer, { HistoryItem } from './HistoryDrawer';
 import Lenis from 'lenis';
+
+const SEED_HISTORY: HistoryItem[] = [
+  {
+    id: 'seed-sony-xm5',
+    query: 'https://www.amazon.in/dp/B09XS7JWHH',
+    type: 'evaluation',
+    store: 'amazon',
+    verdict: 'BUY',
+    confidenceScore: 94,
+    productName: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones',
+    price: '₹29,990',
+    timestamp: 'Yesterday',
+    data: {
+      product_name: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones',
+      product_price: '₹29,990',
+      product_image: 'https://m.media-amazon.com/images/I/61+ElxrSTSL._SL1500_.jpg',
+      verdict: 'BUY',
+      confidence_score: 94,
+      executive_summary: 'Superb noise cancellation, 30-hour battery life, and crystal-clear call quality make this an industry-standard benchmark for premium audio.',
+      pros: [
+        'Class-leading active noise cancellation (ANC)',
+        'Extremely lightweight & comfortable headband design',
+        '30-hour continuous playback with quick charging',
+        'Multipoint Bluetooth connection with LDAC codec support'
+      ],
+      cons: [
+        'Non-folding hinges require a larger carrying case',
+        'Premium price tag compared to previous generation'
+      ],
+      hidden_flaws: [
+        'Synthetic leather earcups may warm up during prolonged humid use'
+      ]
+    }
+  },
+  {
+    id: 'seed-iphone-15',
+    query: 'https://www.flipkart.com/apple-iphone-15-black-128-gb/p/itm6ac6485515ae4',
+    type: 'evaluation',
+    store: 'flipkart',
+    verdict: 'WAIT',
+    confidenceScore: 82,
+    productName: 'Apple iPhone 15 (Black, 128 GB)',
+    price: '₹65,999',
+    timestamp: '2 days ago',
+    data: {
+      product_name: 'Apple iPhone 15 (Black, 128 GB)',
+      product_price: '₹65,999',
+      product_image: 'https://rukminim2.flixcart.com/image/832/832/xif0q/mobile/h/d/9/-original-imagtc2qzgnnuhxh.jpeg',
+      verdict: 'WAIT',
+      confidence_score: 82,
+      executive_summary: 'Features the 48MP primary sensor and Dynamic Island, but historical sale trends show significant price reductions (under ₹58,000) during festival clearances.',
+      pros: [
+        'Dynamic Island with USB-C convenience',
+        'Great 48MP main camera image pipeline',
+        'Bright 2000-nit outdoor Super Retina XDR display'
+      ],
+      cons: [
+        'Still limited to 60Hz refresh rate',
+        'Current non-sale price represents peak retail pricing'
+      ],
+      hidden_flaws: [
+        'Thermal throttling observed under sustained gaming loads'
+      ]
+    }
+  }
+];
 
 let audioCtx: AudioContext | null = null;
 
@@ -86,6 +154,92 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState(0);
   
   const [clickCount, setClickCount] = useState(0);
+
+  // User Authentication & History
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // Safe localStorage hydration
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('verdict_user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+      const storedHistory = localStorage.getItem('verdict_history');
+      if (storedHistory) {
+        const parsed = JSON.parse(storedHistory);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setHistory(parsed);
+          return;
+        }
+      }
+      setHistory(SEED_HISTORY);
+      localStorage.setItem('verdict_history', JSON.stringify(SEED_HISTORY));
+    } catch (e) {
+      console.warn('localStorage error', e);
+    }
+  }, []);
+
+  const handleLogin = (newUser: UserProfile) => {
+    setUser(newUser);
+    try {
+      localStorage.setItem('verdict_user', JSON.stringify(newUser));
+    } catch (e) {}
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    try {
+      localStorage.removeItem('verdict_user');
+    } catch (e) {}
+  };
+
+  const saveToHistory = (item: HistoryItem) => {
+    setHistory(prev => {
+      const filtered = prev.filter(p => p.query !== item.query);
+      const updated = [item, ...filtered].slice(0, 30);
+      try {
+        localStorage.setItem('verdict_history', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
+    try {
+      localStorage.removeItem('verdict_history');
+    } catch (e) {}
+  };
+
+  const handleDeleteHistoryItem = (id: string) => {
+    setHistory(prev => {
+      const updated = prev.filter(h => h.id !== id);
+      try {
+        localStorage.setItem('verdict_history', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const handleSelectHistoryItem = (item: HistoryItem) => {
+    setIsHistoryOpen(false);
+    setError(null);
+    setUrl(item.query);
+    if (item.type === 'search') {
+      setSearchResults(item.data);
+      setResult(null);
+    } else {
+      setResult(item.data);
+      setSearchResults(null);
+    }
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  };
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   
@@ -220,8 +374,30 @@ export default function Home() {
 
       if (action === 'search') {
         setSearchResults(data);
+        saveToHistory({
+          id: `hist_${Date.now()}`,
+          query: url,
+          type: 'search',
+          store: 'general',
+          productName: `Search: "${url}"`,
+          timestamp: 'Just now',
+          data: data,
+        });
       } else {
         setResult(data);
+        const storeType = url.toLowerCase().includes('flipkart') ? 'flipkart' : 'amazon';
+        saveToHistory({
+          id: `hist_${Date.now()}`,
+          query: url,
+          type: 'evaluation',
+          store: storeType,
+          verdict: data.verdict,
+          confidenceScore: data.confidence_score,
+          productName: data.product_name,
+          price: data.product_price,
+          timestamp: 'Just now',
+          data: data,
+        });
       }
     } catch (err: any) {
       setError(err.message);
@@ -315,22 +491,68 @@ export default function Home() {
       />
       
       {/* Top Nav */}
-      <nav className="w-full p-8 flex justify-between items-center z-40 relative shrink-0">
-        <AnimatePresence>
-          {isExpanded ? (
-            <motion.button 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              onClick={resetToHome}
-              className="w-12 h-12 border-2 border-[#FF4D15] rounded-full flex items-center justify-center text-[#FF4D15] hover:bg-[#FF4D15] hover:text-white hover:scale-105 transition-all shadow-lg shadow-[#FF4D15]/20"
-            >
-              <ArrowLeft size={26} strokeWidth={2.5} />
-            </motion.button>
+      <nav className="w-full px-6 py-6 md:px-12 md:py-8 flex justify-between items-center z-40 relative shrink-0">
+        <div>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.button 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                onClick={resetToHome}
+                className="w-11 h-11 border-2 border-[#FF4D15] rounded-full flex items-center justify-center text-[#FF4D15] hover:bg-[#FF4D15] hover:text-white hover:scale-105 transition-all shadow-lg shadow-[#FF4D15]/20 cursor-pointer"
+                title="Reset to Home"
+              >
+                <ArrowLeft size={22} strokeWidth={2.5} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Right Nav Action Controls */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* History Button */}
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="px-3.5 py-2 rounded-full bg-white/80 hover:bg-white border border-zinc-200/90 text-zinc-700 hover:text-zinc-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs backdrop-blur-md cursor-pointer hover:border-[#FF4D15]/40"
+            title="Saved Verdicts & Search History"
+          >
+            <History size={15} className="text-[#FF4D15]" />
+            <span className="hidden sm:inline">History</span>
+            {history.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-orange-100 text-[#FF4D15] text-[10px] font-black flex items-center justify-center">
+                {history.length}
+              </span>
+            )}
+          </button>
+
+          {/* Auth / Profile Button */}
+          {user ? (
+            <div className="flex items-center gap-2 bg-white/90 border border-zinc-200/90 rounded-full pl-2 pr-3 py-1 shadow-xs backdrop-blur-md">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF4D15] to-amber-500 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-bold text-zinc-800 max-w-[120px] truncate">
+                {user.name}
+              </span>
+              <button
+                onClick={handleLogout}
+                title="Sign Out"
+                className="text-zinc-400 hover:text-rose-600 transition p-1 cursor-pointer"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
           ) : (
-            <div />
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              className="px-4 py-2 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer hover:scale-105 active:scale-95"
+            >
+              <User size={14} />
+              <span>Sign In</span>
+            </button>
           )}
-        </AnimatePresence>
+        </div>
       </nav>
 
       {/* Hero Section - Shrinks and moves up to make space for results */}
@@ -784,6 +1006,25 @@ export default function Home() {
           </button>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLogin={handleLogin}
+      />
+
+      {/* History Drawer */}
+      <HistoryDrawer
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        onSelect={handleSelectHistoryItem}
+        onClear={handleClearHistory}
+        onDelete={handleDeleteHistoryItem}
+        user={user}
+        onOpenAuth={() => setIsAuthOpen(true)}
+      />
 
     </div>
   );
